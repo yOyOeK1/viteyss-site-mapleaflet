@@ -1,0 +1,17 @@
+{
+    "oName": "s_vysmapleafletPage",
+    "o": null,
+    "dir": "viteyss-site-mapleaflet",
+    "asModule": true,
+    "asVite": true,
+    "asPlugin": true,
+    "jssrc":["c_vys_mapleaflet_Page.js"],
+    "apisrc":["api_mapleaflet.js"],
+    "enable": true,
+    "author": "Bartłomiej Ceglik <yoyoek@wp.pl>",
+    "ver": "0.0.1",
+    "desc": "Map on leafletjs",
+    "otdm":{
+        "playground": false
+    }
+}
