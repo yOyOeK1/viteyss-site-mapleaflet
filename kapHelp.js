@@ -1,10 +1,9 @@
 
 import { spawnSync } from 'child_process';
-import { dir } from 'console';
 import fs from 'fs'
 import path from 'path'
 
-var pathToImgKapSpilt = '/home/yoyo/Apps/viteyss-site-mapleaflet/bin/imgkapSpilt.sh';
+var pathToImgKapSplit = '/home/yoyo/Apps/viteyss-site-mapleaflet/bin/imgkapSpilt.sh';
 
 
 
@@ -98,9 +97,9 @@ let kapFileIdentState = function ( pathToKa, dirList, buildMissing = false ){
         // if missing 
         if( buildMissing ){
             if( !tMheaderKap || !tPng ){
-                cl(`buildMissing \n\t\t[${pathToImgKapSpilt} ${pathToKa}]\n------------------------------`);
+                cl(`buildMissing \n\t\t[${pathToImgKapSplit} ${pathToKa}]\n------------------------------`);
                 let worker = spawnSync( 
-                    path.resolve(pathToImgKapSpilt),
+                    path.resolve(pathToImgKapSplit),
                     [path.resolve(pathToKa)])
                     ;
                 if (worker.error) {
