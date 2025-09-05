@@ -1,4 +1,5 @@
 import MapioMapsPanel from "./assets/mapioMapsPanel.vue";
+import { lcFileGpxLoad } from "./lcFileGpx";
 import { lfBaseMaps } from "./lfBaseMaps";
 import { lfMakeIconClickable } from "./lfMakeIconClickable";
 import { lfMakeKmPanel } from "./lfMakeKmPanel";
@@ -18,6 +19,7 @@ class s_vysmapleafletPage{
     this.onlineMaps = onlineMaps;
 
     this.mPanel = -1;
+    this.lcFileGpx = -1;
 
   }
   
@@ -34,14 +36,15 @@ class s_vysmapleafletPage{
     
     
 
-    return `
-    <style>
+    return `<style>
     .leaflet-control-attribution{
       display: none;
     }
     </style>
     <link rel="stylesheet" href="${this.homeUrl}node_modules/leaflet/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
     <script src="${this.homeUrl}node_modules/leaflet/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="${this.homeUrl}assets/togeojson.js"></script>
+    <script src="${this.homeUrl}assets/leaflet.filelayer.js"></script>
 <!--
     <b>${this.getName}</b><br>
     <img src="${this.homeUrl}assets/ico_viteyss_32.png"><br>
@@ -53,11 +56,9 @@ class s_vysmapleafletPage{
     Ver: ${this.instanceOf.ver}
 
     More ditails in \`./site.json\`
-    </pre>-->
-    <div id="lfmapdiv"
-      style="width: 100vw; min-height: 100vh;"></div>
-    
-    `;
+    </pre>
+    --><div id="lfmapdiv"
+      style="width: 100vw; min-height: 100vh;"></div>`;
 
   }
 
@@ -103,6 +104,8 @@ class s_vysmapleafletPage{
       console.log('loaded lfmap ... :)');
       this.mPanel.mount('.kmdivPanel');
 
+
+      // events 
       this.lfmap.on( 'moveend', (e='')=>{
         console.log('moveend ....');
         this.mPanel._instance.ctx.onMoveDoneEvent(this);
@@ -116,6 +119,8 @@ class s_vysmapleafletPage{
         this.mPanel._instance.ctx.currentFolderOverlayChange(e);
       });
 
+      // playground 
+      this.lcFileGpx = lcFileGpxLoad( this.lfmap );
 
       //this.lfmap.on(
       //  'moveend', 
