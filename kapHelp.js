@@ -83,7 +83,7 @@ let kapFileIdentState = function ( pathToKa, dirList, buildMissing = false ){
         
         let pathToKaNoExt = pathToKa.substring( 0, pathToKa.length-4 );
         let fNameBase = pathToKa.substring( pathToKa.lastIndexOf('/')+1, pathToKa.length-4 );
-        cl(['look for splits ',path.dirname( pathToKa ), '.split', `${fNameBase}.mheader.kap`]);
+        //cl(['look for splits ',path.dirname( pathToKa ), '.split', `${fNameBase}.mheader.kap`]);
         let tMheaderKap = false;
         let tMheaderKapPath = path.join( path.dirname( pathToKa ), '.split', `${fNameBase}.mheader.kap`);
         let tPng = false;
@@ -159,10 +159,11 @@ let kapLookInDir = function ( dirToLook, parentDir = undefined, buildMissing = f
             let tRes = kapFileIdentState( dElFull, dirList, buildMissing );
             if(  tRes[0] == 'ok' ){
                  parentDir.push( {
+                    "fname": dEl,
                     "path": dElFull,
                     "isDir": false,
                     "kapMain": true,
-                    "conf":tRes[1]
+                    "split":tRes[1]
                 } );
             }
 

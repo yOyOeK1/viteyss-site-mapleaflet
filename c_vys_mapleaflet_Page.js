@@ -1,8 +1,10 @@
+import MapioMapsPanel from "./assets/mapioMapsPanel.vue";
 import { lfBaseMaps } from "./lfBaseMaps";
 import { lfMakeIconClickable } from "./lfMakeIconClickable";
+import { lfMakeKmPanel } from "./lfMakeKmPanel";
 import { lfOverLayMaps } from "./lfoverlayMaps";
 import onlineMaps from "./onlineMaps";
-
+import { createApp } from 'vue';
 
 
 class s_vysmapleafletPage{
@@ -14,6 +16,8 @@ class s_vysmapleafletPage{
     this.lftileLayer_osm = -1;
     this.lftileLayer_work = -1;
     this.onlineMaps = onlineMaps;
+
+    this.mPanel = -1;
 
   }
   
@@ -28,6 +32,8 @@ class s_vysmapleafletPage{
   
   getHtml = () => {
     
+    
+
     return `
     <style>
     .leaflet-control-attribution{
@@ -62,15 +68,20 @@ class s_vysmapleafletPage{
   getHtmlAfterLoad = () =>{
     cl(`${this.getName} - getHtmlAfterLoad()`);
  
+    this.mPanel = createApp( MapioMapsPanel );
+
     setTimeout(()=>{
 
 
       this.lfmap = L.map('lfmapdiv',{
           center: [9.2620320938,-79.9355079], 
-          zoom:17
-        });
+          zoom:12
+      });
+    
 
       
+      
+    
       this.lflayCon = L.control.layers( 
         lfBaseMaps( this.lfmap ), 
         lfOverLayMaps( this.lfmap, this.homeUrl )
@@ -81,8 +92,34 @@ class s_vysmapleafletPage{
       this.lfAddMarker([9.3416632,-79.906264422]);
       
       
-      
+      lfMakeKmPanel( this.lfmap, this.homeUrl)
+
+      console.log('loaded lfmap ... :)');
+      this.mPanel.mount('.kmdivPanel');
+      this.lfmap.on( 'moveend', (e='')=>{
+        console.log('moveend ....');
+        this.mPanel._instance.ctx.onMoveDoneEvent(this);
+      });
+
+
+      //this.lfmap.on(
+      //  'moveend', 
+      //  (e)=>{console.log('viewrestart ....');}
+        //this.mPanel._instance.ctx.onMoveDoneEvent
+      //);
+
       lfMakeIconClickable( this.lfmap, this.homeUrl)
+
+      /*
+      // add temst kml file 
+      let b = L.latLngBounds( 
+            L.latLng( 9.37471695665061, -79.9458092451096 ),
+            L.latLng( 9.36598906657464, -79.9522948265076 )
+      );
+      let imageUrl = `${this.homeUrl}/workKmls/shelterBayMarine`;
+      console.log('imageUrl: ',imageUrl);
+      L.imageOverlay( imageUrl, b ).addTo( this.lfmap );
+      */
 
     },700);
 

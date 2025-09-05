@@ -12,6 +12,7 @@
   "description": "Map on leafletjs",
   "dependencies": {
     "leaflet": "^1.9.4",
-    "undici": "^7.15.0"
+    "undici": "^7.15.0",
+    "xml-js": "^1.6.11"
   }
 }

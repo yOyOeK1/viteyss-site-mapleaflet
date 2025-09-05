@@ -12,14 +12,22 @@ async function savePhotoFromAPI(u, saveIt = false, callBack = undefined ) {
 
   }
 
-  const response = await fetch(u);
-  const arrayBuffer = await response.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
-  if( saveIt!=false ){
-    fs.createWriteStream(saveIt).write(buffer);
+  try{
+    const response = await fetch(u);
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    if( saveIt!=false ){
+      fs.createWriteStream(saveIt).write(buffer);
+    }
+  
+    if( callBack != undefined ) callBack( buffer );
+  }catch(e){
+    console.error('featchhttps error ',e);
+    if( callBack != undefined ) {
+      callBack( undefined );
+    }
+    return -1;
   }
-
-  if( callBack != undefined ) callBack( buffer );
 
     
 }
