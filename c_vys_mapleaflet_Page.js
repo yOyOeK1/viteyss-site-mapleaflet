@@ -65,6 +65,15 @@ class s_vysmapleafletPage{
     L.marker( ll ).addTo( this.lfmap );
   }
 
+
+  addMapOverlay=()=>{
+    var crownHill = L.marker([39.75, -105.09]).bindPopup('This is Crown Hill Park.'),
+    rubyHill = L.marker([39.68, -105.00]).bindPopup('This is Ruby Hill Park.');
+    
+    var parks = L.layerGroup();
+    this.lflayCon.addOverlay( parks, 'Abc park');
+  }
+
   getHtmlAfterLoad = () =>{
     cl(`${this.getName} - getHtmlAfterLoad()`);
  
@@ -79,12 +88,9 @@ class s_vysmapleafletPage{
       });
     
 
-      
-      
-    
       this.lflayCon = L.control.layers( 
-        lfBaseMaps( this.lfmap ), 
-        lfOverLayMaps( this.lfmap, this.homeUrl )
+        lfBaseMaps( this.lfmap )//, 
+        //lfOverLayMaps( this.lfmap, this.homeUrl )
       ).addTo( this.lfmap );
       //lflayCon.addBaseLayer(osmHOT, 'OpenHotMap');
       
@@ -96,9 +102,18 @@ class s_vysmapleafletPage{
 
       console.log('loaded lfmap ... :)');
       this.mPanel.mount('.kmdivPanel');
+
       this.lfmap.on( 'moveend', (e='')=>{
         console.log('moveend ....');
         this.mPanel._instance.ctx.onMoveDoneEvent(this);
+      });
+      this.lfmap.on('overlayadd',(e='')=>{
+        console.log('overlayadded ....');
+        this.mPanel._instance.ctx.currentFolderOverlayChange(e);
+      });
+       this.lfmap.on('overlayremove',(e='')=>{
+        console.log('overlayremove ....');
+        this.mPanel._instance.ctx.currentFolderOverlayChange(e);
       });
 
 

@@ -34,8 +34,8 @@ class serverMapLeaflet{
         this.server = undefined;
         this.casheFolder = '/home/yoyo/tmp/charts';
         this.mapioFolders = [
-           { 'name': 'kaps1', 'dir': '/home/yoyo/Apps/viteyss-site-mapleaflet/tests' },
-           { 'name': 'kmls1', 'dir': '/home/yoyo/Apps/viteyss-site-mapleaflet/workKmls' }
+           { 'name': 'kaps1 test', 'dir': '/home/yoyo/Apps/viteyss-site-mapleaflet/tests' },
+           { 'name': 'kmls1 test', 'dir': '/home/yoyo/Apps/viteyss-site-mapleaflet/workKmls' }
         ];
         this.kapsResults = -1;
         this.onlineMaps = onlineMaps;
@@ -241,7 +241,7 @@ class serverMapLeaflet{
             tr['payload'] = pt;
 
 
-
+            tr['mapFolders'] = this.mapioFolders;
             this.kapsResults = tr['payload'];
 
             res.end(JSON.stringify(tr,null,4)+"\n");

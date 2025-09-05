@@ -14,7 +14,8 @@
             :lfmapprop="mlfmap"
             :style="'max-width:'+mapItemWidth+'px;'"
             />
-    </span>
+    </span><br>
+    don't show:{{ mapNotShow }}
     
 
 </template>
@@ -33,10 +34,15 @@ export default{
         let mapios = ref([]);
         let mlfmap = ref(Object());
         let mapKeys = ref([]);
+        let mapFolders = ref(Object());
+        let mapFoldersDone = false;
+        let mapNotShow =ref([]);
         let openNowCount = ref(0);
         
 
-        return { status, mapios, mlfmap, mapKeys, openNowCount };
+        return { status, mapios, mlfmap, mapKeys, 
+            mapFolders, mapFoldersDone, mapNotShow,
+            openNowCount };
 
     },
     mounted(){
@@ -82,6 +88,7 @@ export default{
         buildMapio( mapio ){
             mapio['inframe'] = false;
             mapio['showing'] = false;
+            mapio['forceAction'] = false;
             mapio['zoomOk'] = {};
             mapio['llArea'] = mapio.split.llSize[0]*mapio.split.llSize[1];
             mapio['mapioB'] = L.latLngBounds( 
@@ -102,6 +109,7 @@ export default{
             }
             return mapio;
         },
+        
         onMoveDoneEvent( e ){
             this.mlfmap = e.lfmap;
             let mapB = e.lfmap.getBounds();
@@ -109,49 +117,82 @@ export default{
             let mapSize = [ 
                 mapB['_northEast']['lng'] - mapB['_southWest']['lng'],
                 mapB['_northEast']['lat'] - mapB['_southWest']['lat']
-             ];
+            ];
             let mapArea = mapSize[0]*mapSize[1];
+
+            // add to controls all directories
+            if( this.mapFoldersDone == false )
+                this.setCurrentFoldersOverlays();  
+
+            // see what to show
             for( let mapio of this.mapios ){
                 if( !('mapioB' in mapio) ){
                     mapio = this.buildMapio( mapio );
                 }
 
-                //console.log('mapB',mapB,'\nmapioB',mapio['mapioB']);
-                if( mapB.intersects( mapio['mapioB']) ){
-                    let gogoScale = false;
-                    // clean this on resize !!! 
-                    if( mapZoom in mapio['zoomOk'] ){
-                        gogoScale = mapio['zoomOk'][mapZoom];
+                
+                // skip if 
+                if( mapio['forceAction'] ){
 
-                    }else{
-                        let fraction = mapio['llArea']/mapArea;
-                        if( fraction < 120.00 && fraction > 0.1 ){
-                            gogoScale = true;
-                            mapio['zoomOk'][mapZoom]=true;
-                        }else{
-                            mapio['zoomOk'][mapZoom]=false;
-                        }
-                    }
                     
-                   this.mapioInFrame(e.lfmap, mapio, gogoScale);
+                
+                // filter only overlay selected 
+                }else if( this.mapNotShow.indexOf( mapio['kapDir'] ) == -1 ){
+                
+                    //console.log('mapB',mapB,'\nmapioB',mapio['mapioB']);
+                    if( mapB.intersects( mapio['mapioB']) ){
+                        let gogoScale = false;
+                        // clean this on resize !!! 
+                        if( mapZoom in mapio['zoomOk'] ){
+                            gogoScale = mapio['zoomOk'][mapZoom];
 
-                }else{
-                    this.mapioOfFrame(e.lfmap, mapio);
-
+                        }else{
+                            let fraction = mapio['llArea']/mapArea;
+                            if( fraction < 120.00 && fraction > 0.1 ){
+                                gogoScale = true;
+                                mapio['zoomOk'][mapZoom]=true;
+                            }else{
+                                mapio['zoomOk'][mapZoom]=false;
+                            }
+                        }
+                        
+                        this.mapioInFrame(e.lfmap, mapio, gogoScale);
+                        
+                    }else{
+                        this.mapioOfFrame(e.lfmap, mapio);
+                        
+                    }
                 }
             }
         },
-
-
+        
+        currentFolderOverlayChange( e ){
+            if( this.mapFoldersDone ){
+                if( e['type'] == 'overlayadd' ){
+                    this.mapiosOffFrame( this.mlfmap, this.mapios );
+                    let fid = this.mapNotShow.indexOf( e['name'] );
+                    this.mapNotShow.pop( fid );
+                    this.onMoveDoneEvent({'lfmap':this.mlfmap});
+                }else if( e['type'] == 'overlayremove' ){
+                    this.mapiosOffFrame(  this.mlfmap, this.mapios );
+                    this.mapNotShow.push( e['name'] );
+                    this.onMoveDoneEvent({'lfmap':this.mlfmap});
+                }
+            }
+            
+        },
+        // from items emit on show / hide
         handleCustomEvent(data) {
             //receivedData.value = data;
             console.log('parent got click',data);
-            let mapio = this.mapios[ data.kid ];
-            console.log(`mapio at ${data.kid} ${mapio.fname}`);
-            if( mapio.showing )
+            let mapio = this.mapios[ data['kid'] ];
+            console.log(`mapio at ${data['kid']} ${mapio.fname}`);
+            if( mapio.showing ){                
                 this.mapioInFrame( this.mlfmap, mapio, false );
-            else
+            }else{
                 this.mapioInFrame( this.mlfmap, mapio, true );
+            }
+            mapio['forceAction'] = ! mapio['forceAction'];
         
         },
 
@@ -182,6 +223,11 @@ export default{
 
             }                      
         },
+        mapiosOffFrame( lfmap, mapios ){
+            for( let m of mapios ){
+                this.mapioOfFrame( lfmap, m );
+            }
+        },
         mapioOfFrame( lfmap, mapio ){
             if( mapio.inframe == true ){
                 if( mapio.showing == false ){
@@ -189,8 +235,9 @@ export default{
                 }else{
                     mapio.imageOverlay.removeFrom( lfmap );
                 }
-                mapio.showing = false;
-                mapio.inframe = false;
+                mapio['showing'] = false;
+                mapio['inframe'] = false;
+                mapio['forceAction'] = false;
                 this.openNowCount--;
             }
                       
@@ -218,16 +265,28 @@ export default{
                             this.mapKeys.push( m['type'] );
                     }
 
+                    this.mapFolders = data.mapFolders;
                     this.mapios = data.payload;
+                    window['mapios'] = this.mapios;
+                    
 
                 }else{
                     this.status = 'got wrong data';
                 }
             });
+        },
 
-
-
+        setCurrentFoldersOverlays(){
+            //console.log('set current folders overlays done '+this.mapFoldersDone+'....',this.mlfmap,"\n\n",this.mapFolders);
+            for( let mf of this.mapFolders){
+                //console.log('add current folder '+mf.name);
+                mf['o-ov'] = L.layerGroup({"customID":Math.random()});
+                pager._page.lflayCon.addOverlay( mf['o-ov'], mf.name);
+                mf['o-ov'].addTo( this.mlfmap );
+            }
+            this.mapFoldersDone = true;
         }
+
     }
 }
 </script>

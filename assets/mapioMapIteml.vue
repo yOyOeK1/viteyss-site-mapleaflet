@@ -5,7 +5,7 @@
         :title="kitem.fname+': \n'+kitem.path+' \ndpA: '+kitem.dpA+'\nlat, lon: '+JSON.stringify(kitem.split['llCenter'])"
         :style="{ 
             'background-color':  doBgColor(),
-         
+            'border': doBordorColor()
             }"
         @click="itemClick()"
         @mouseover="mouseOverS()"
@@ -40,6 +40,14 @@ export default{
             }else{
                 return 'gray';
             }
+        },
+        doBordorColor(){
+            //
+            let color = 'rgb(209, 255, 91)';
+            //console.log(this.kitem);
+            if( this.kitem['forceAction'] )
+                color = '#ff0000';
+            return `solid 1px ${color}`;
         },
         mouseOverS(){
             if( this.lBorder == -1 ){
@@ -79,7 +87,6 @@ export default{
     display: inline-block;
     max-height: 15px;
     border-radius: 3px;
-    border: solid 1px gray;
     padding:3px;
     margin-left: 2px;
 

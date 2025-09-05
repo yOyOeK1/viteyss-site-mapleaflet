@@ -1,4 +1,5 @@
 let lfOverLayMaps = function( map, thomeUrl ){
+    
     let lftileLayer_work = L.tileLayer(`${thomeUrl}workTiles/{z}/{x}/{y}.png`, {
         maxZoom: 18,
         minZoom: 15,
@@ -19,8 +20,8 @@ let lfOverLayMaps = function( map, thomeUrl ){
       });//.addTo(this.lfmap);
       
       var overlayMaps = {
-        "EB - panama": lftileLayer_work,
-        "bing": lftileLayer_workBing,
+        //"EB - panama": lftileLayer_work,
+        //"bing": lftileLayer_workBing,
       };
 
       return overlayMaps;
