@@ -16,14 +16,16 @@ export default{
         'homeUrl': { type: String, required: true },
         'fileLoad': { type: Boolean, default: false },
         'mapOpts': { default: { center: [9.2620320938,-79.9355079], zoom:12 } },
-        'mapioDirs': { type: Boolean, default: false }
+        'mapioDirs': { type: Boolean, default: false },
+        'addFullScreenBt': { type: Boolean, default: false }, // fullscreen button next to zoom
     },
     data(){
         let map = ref();
         let control = ref();
+        let fsControl = ref(); // fullscreen controls
         let conFileLoad = ref();
 
-        return { map, control, conFileLoad };
+        return { map, control, fsControl, conFileLoad };
     },
     methods:{
         doEcho(){
@@ -51,8 +53,20 @@ export default{
         }
 
         
+        if( this.addFullScreenBt ){
+            this.fsControl = L.control.fullscreen();
+            this.map.addControl( this.fsControl );
+            this.map.on('enterFullscreen', function(){
+                if(window.console) window.console.log('enterFullscreen');
+            });
+            this.map.on('exitFullscreen', function(){
+                if(window.console) window.console.log('exitFullscreen');
+            });
+        }
+
+        
         if( this.fileLoad )
-        this.conFileLoad = lcFileGpxLoad( this.map );
+            this.conFileLoad = lcFileGpxLoad( this.map );
         
         if( this.mapioDirs ){
             let mPanelDivName = this.mapname+'divKmPanel';

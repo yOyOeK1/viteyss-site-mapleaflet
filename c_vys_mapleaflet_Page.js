@@ -49,6 +49,8 @@ class s_vysmapleafletPage{
     <script src="${this.homeUrl}node_modules/leaflet/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="${this.homeUrl}assets/togeojson.js"></script>
     <script src="${this.homeUrl}assets/leaflet.filelayer.js"></script>
+    <link rel="stylesheet" href="${this.homeUrl}assets/leaflet.fullscreen.Control.FullScreen.css">
+    <script src="${this.homeUrl}assets/leaflet.fullscreen.Control.FullScreen.js"></script>
 <!--
     <b>${this.getName}</b><br>
     <img src="${this.homeUrl}assets/ico_viteyss_32.png"><br>
@@ -92,10 +94,13 @@ class s_vysmapleafletPage{
               'center': [9.2620320938,-79.9355079], 'zoom':12
             },
             'fileLoad': false, 'homeUrl': this.homeUrl,  
-            'addlfBaseMaps': true} ).mount('#lfmapio');
+            'addlfBaseMaps': true,
+            
+          } ).mount('#lfmapio');
       this.mioApp1 = createApp( MapioMapio, 
         {'mapname':"mioMap2", 
             'mapioDirs': true,
+            'addFullScreenBt': true,
             'fileLoad': true, 'homeUrl': this.homeUrl,  
             'addlfBaseMaps': false} ).mount('#lfmapio2');
 
