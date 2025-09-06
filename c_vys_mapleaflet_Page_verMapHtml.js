@@ -1,4 +1,3 @@
-import MapioMapio from "./assets/mapioMapio.vue";
 import MapioMapsPanel from "./assets/mapioMapsPanel.vue";
 import { lcFileGpxLoad } from "./lcFileGpx";
 import { lfBaseMaps } from "./lfBaseMaps";
@@ -12,7 +11,6 @@ import { createApp } from 'vue';
 class s_vysmapleafletPage{
 
   constructor(){
-
     this.lfmap = -1;
     this.lflayCon = -1;
     this.lfpanel = -1;
@@ -20,8 +18,6 @@ class s_vysmapleafletPage{
     this.lftileLayer_work = -1;
     this.onlineMaps = onlineMaps;
 
-    this.mioApp = -1;
-    this.mioApp1 = -1;
     this.mPanel = -1;
     this.lcFileGpx = -1;
 
@@ -61,10 +57,8 @@ class s_vysmapleafletPage{
 
     More ditails in \`./site.json\`
     </pre>
-    -->
-    <div id="lfmapio"></div>
-    <div id="lfmapio2"></div>
-    `;
+    --><div id="lfmapdiv"
+      style="width: 100vw; min-height: 100vh;"></div>`;
 
   }
 
@@ -83,38 +77,7 @@ class s_vysmapleafletPage{
 
   getHtmlAfterLoad = () =>{
     cl(`${this.getName} - getHtmlAfterLoad()`);
-    
-    //setTimeout(()=>{
-      this.mioApp = createApp( MapioMapio,  
-        {'mapname':"mio", 
-            'mapOpts':{'abc':1,
-              'zoomControl': false,
-              'center': [9.2620320938,-79.9355079], 'zoom':12
-            },
-            'fileLoad': false, 'homeUrl': this.homeUrl,  
-            'addlfBaseMaps': true} ).mount('#lfmapio');
-      this.mioApp1 = createApp( MapioMapio, 
-        {'mapname':"mioMap2", 
-            'mapioDirs': true,
-            'fileLoad': true, 'homeUrl': this.homeUrl,  
-            'addlfBaseMaps': false} ).mount('#lfmapio2');
-
-
-
-      // bind move 
-      if( 1 ){
-        this.mioApp.$data.map.on( 'moveend', (e='')=>{
-          //console.log('connect moveend ....');
-          this.mioApp1.$data.map.setView(
-            this.mioApp.$data.map.getCenter(),
-            this.mioApp.$data.map.getZoom()
-          );
-         // this.mPanel._instance.ctx.onMoveDoneEvent( {'lfmap':this.map} );
-        });
-      }
-
-    //},500);
-    /*
+ 
     this.mPanel = createApp( MapioMapsPanel );
 
     setTimeout(()=>{
@@ -167,10 +130,19 @@ class s_vysmapleafletPage{
 
       lfMakeIconClickable( this.lfmap, this.homeUrl)
 
-     
+      /*
+      // add temst kml file 
+      let b = L.latLngBounds( 
+            L.latLng( 9.37471695665061, -79.9458092451096 ),
+            L.latLng( 9.36598906657464, -79.9522948265076 )
+      );
+      let imageUrl = `${this.homeUrl}/workKmls/shelterBayMarine`;
+      console.log('imageUrl: ',imageUrl);
+      L.imageOverlay( imageUrl, b ).addTo( this.lfmap );
+      */
 
     },700);
-    */
+
   }
 
   get svgDyno(){

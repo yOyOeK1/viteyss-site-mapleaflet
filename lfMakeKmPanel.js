@@ -1,15 +1,16 @@
-let lfMakeKmPanel = function(map, thomeUrl){
+let lfMakeKmPanel = function(map, thomeUrl, divName = 'kmdivPanel'){
 
     L.Control.Watermark = L.Control.extend({
 
         onAdd: function(map) {            
             var kmdiv = L.DomUtil.create('div');
-            L.DomUtil.setClass( kmdiv, 'kmdivPanel');
-            kmdiv.innerHTML = 'KmPanel';
+            L.DomUtil.setClass( kmdiv, divName);
+            kmdiv.innerHTML = 'KmPanel ('+divName+')';
             L.DomUtil.setPosition( kmdiv, L.point(0,-60));
             L.DomEvent.on(kmdiv, 'click',(e)=>{
               let mousPos = L.DomEvent.getMousePosition(e);
               console.log('click', 
+                'divName: '+divName,
                 `kmmouse: ${mousPos}`, 
                 'zoom: '+map.getZoom(),
                 'll:'+map.containerPointToLatLng( mousPos ),// ,tlfmap.getZoom()) 

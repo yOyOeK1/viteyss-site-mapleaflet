@@ -27,6 +27,9 @@ import MapioMapIteml from './mapioMapIteml.vue';
 
 
 export default{
+    props:{
+        'mapioMap': { required: true }
+    },
     components:{ MapioMapIteml },
     data(){
         let status = ref('loaded');
@@ -129,12 +132,9 @@ export default{
                 if( !('mapioB' in mapio) ){
                     mapio = this.buildMapio( mapio );
                 }
-
                 
                 // skip if 
-                if( mapio['forceAction'] ){
-
-                    
+                if( mapio['forceAction'] ){                    
                 
                 // filter only overlay selected 
                 }else if( this.mapNotShow.indexOf( mapio['kapDir'] ) == -1 ){
@@ -268,7 +268,7 @@ export default{
                     this.mapFolders = data.mapFolders;
                     this.mapios = data.payload;
                     window['mapios'] = this.mapios;
-                    
+                    this.onMoveDoneEvent( {'lfmap':this.mapioMap.map} );
 
                 }else{
                     this.status = 'got wrong data';
@@ -277,11 +277,13 @@ export default{
         },
 
         setCurrentFoldersOverlays(){
-            //console.log('set current folders overlays done '+this.mapFoldersDone+'....',this.mlfmap,"\n\n",this.mapFolders);
+            console.log('set current folders\ncontrol:\n'+this.control+' overlays done '+this.mapFoldersDone+'....',this.mlfmap,"\n\n",this.mapFolders);
             for( let mf of this.mapFolders){
                 //console.log('add current folder '+mf.name);
                 mf['o-ov'] = L.layerGroup({"customID":Math.random()});
-                pager._page.lflayCon.addOverlay( mf['o-ov'], mf.name);
+                window['mapioMap'] = this.mapioMap;
+                //pager._page.lflayCon
+                this.mapioMap.control.addOverlay( mf['o-ov'], mf.name);
                 mf['o-ov'].addTo( this.mlfmap );
             }
             this.mapFoldersDone = true;
