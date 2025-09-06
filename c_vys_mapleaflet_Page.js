@@ -1,5 +1,6 @@
 import MapioMapio from "./assets/mapioMapio.vue";
 import MapioMapsPanel from "./assets/mapioMapsPanel.vue";
+import { contextMenuSimple } from "./contextMenuSimple";
 import { lcFileGpxLoad } from "./lcFileGpx";
 import { lfBaseMaps } from "./lfBaseMaps";
 import { lfMakeIconClickable } from "./lfMakeIconClickable";
@@ -52,6 +53,8 @@ class s_vysmapleafletPage{
     <link rel="stylesheet" href="${this.homeUrl}assets/leaflet.fullscreen.Control.FullScreen.css">
     <script src="${this.homeUrl}assets/leaflet.fullscreen.Control.FullScreen.js"></script>
     <script src="${this.homeUrl}assets/leaflet.tilelayer.fallback.js"></script>
+    <link rel="stylesheet" href="${this.homeUrl}assets/leaflet.contextmenu.css">
+    <script src="${this.homeUrl}assets/leaflet.contextmenu.js"></script>
 <!--
     <b>${this.getName}</b><br>
     <img src="${this.homeUrl}assets/ico_viteyss_32.png"><br>
@@ -87,6 +90,9 @@ class s_vysmapleafletPage{
   getHtmlAfterLoad = () =>{
     cl(`${this.getName} - getHtmlAfterLoad()`);
     
+
+
+    
     //setTimeout(()=>{
       this.mioApp = createApp( MapioMapio,  
         {'mapname':"mio", 
@@ -96,7 +102,7 @@ class s_vysmapleafletPage{
             },
             'fileLoad': false, 'homeUrl': this.homeUrl,  
             'addlfBaseMaps': true,
-            
+            'addContextMenu': contextMenuSimple( this.homeUrl ),            
           } ).mount('#lfmapio');
       this.mioApp1 = createApp( MapioMapio, 
         {'mapname':"mioMap2", 

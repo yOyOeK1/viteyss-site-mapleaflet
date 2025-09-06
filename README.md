@@ -39,7 +39,7 @@ In core when it handle kap files it use ***imgkap** software to split kap to mhe
 
 Libraries are comming prefetchd. So are comming with viteyss-site-mapleatlet. Cas be found in `./assets` directory.
 
-[leaflet.fullscreen](https://github.com/brunob/leaflet.fullscreen) | [leaflet.filelayer.js](https://github.com/makinacorpus/Leaflet.FileLayer) | [togeojson.js](https://github.com/mapbox/togeojson) | [leaflet.js](https://leafletjs.com) | [vue.js](https://vuejs.org/) | [leaflet.TileLayer.Fallback](https://github.com/ghybs/Leaflet.TileLayer.Fallback/tree/master)
+[leaflet.fullscreen](https://github.com/brunob/leaflet.fullscreen) | [leaflet.filelayer.js](https://github.com/makinacorpus/Leaflet.FileLayer) | [togeojson.js](https://github.com/mapbox/togeojson) | [leaflet.js](https://leafletjs.com) | [vue.js](https://vuejs.org/) | [leaflet.TileLayer.Fallback](https://github.com/ghybs/Leaflet.TileLayer.Fallback/tree/master) | [leaflet.contextmenu](https://aratcliffe.github.io/Leaflet.contextmenu/examples/index.html)
 
 
 ### charts local file system
@@ -75,6 +75,7 @@ Example will be init of main `mapioMapio.vue` to `div`
         },
         'addFullScreenBt': true,
         'addFallbackTiles': false, 
+        'addContextMenu': contextMenuSimple( this.homeUrl ), // look as a example
         'fileLoad': false, 'homeUrl': this.homeUrl,  
         'addlfBaseMaps': true} ).mount('#lfmapio');
 
@@ -82,11 +83,19 @@ Example will be init of main `mapioMapio.vue` to `div`
         //              it need to provide correct style of div element
 ```
 
+- [x] **addContextMenu** custome menu context on right / longpress
+
+    ![](./examples/screen_menucontextSimple.png)
+    *contextMenuSimple.js* show simple menu and options for customization.
 
 
 ### ideas
 
+- [ ] button slots
 - [ ] mesure distance / bearing
+    * https://ppete2.github.io/Leaflet.PolylineMeasure/demo1.html
+    * https://blog.cyclemap.link/Leaflet.Geodesic/basic-interactive.html
+- [ ] track from client ico uniformd
 - [ ] tracks
     - [ ] load from directory
     - [ ] show / hide manager
@@ -97,5 +106,12 @@ Example will be init of main `mapioMapio.vue` to `div`
 - [ ] overlay for gui as
     - [ ] svg
     - [ ] html
+
+
+### to fix
+
+- [ ] file load gpx will not add track to overlayer list. shoud? 
+- [ ] map tile fallback now will looc in CyclOSM tiles.
+    so if you have black tiles now in offline white tiles can show up 
 
 

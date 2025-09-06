@@ -18,7 +18,8 @@ export default{
         'mapOpts': { default: { center: [9.2620320938,-79.9355079], zoom:12 } },
         'mapioDirs': { type: Boolean, default: false },
         'addFullScreenBt': { type: Boolean, default: false }, // fullscreen button next to zoom
-        'addFallbackTiles': { type: Boolean, default: true }
+        'addFallbackTiles': { type: Boolean, default: true },
+        'addContextMenu': { default: undefined } // look leaflet.contextmenu.js
     },
     data(){
         let map = ref();
@@ -42,6 +43,14 @@ export default{
 
         
         console.log('log concat mapOptions');
+
+        if( this.addContextMenu != undefined ){
+            for(let k of Object.keys( this.addContextMenu) ){
+                this.mapOpts[ k ] = this.addContextMenu[ k ];
+            }
+        }
+
+
         this.map = L.map( this.mapname, this.mapOpts);
 
         if( this.addFallbackTiles ){
@@ -54,9 +63,7 @@ export default{
                 errorTileUrl: `${this.homeUrl}assets/leaflet.TileLayer.Fallback.no-tile.png`
             });
 
-
             this.tilesFallback.addTo( this.map );
-
         }
 
 
