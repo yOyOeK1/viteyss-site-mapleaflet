@@ -19,6 +19,7 @@ First draft `25090610`
 - baseMaps from [OpenStreetMap](http://www.openstreetmap.org/copyright)
 - fullscreen button
 - proxy for tiles. So one time view online is accessable later as **offline**. For hosts tailing services, configs in `onlineMaps.js`
+- tile layer fallback
 - chart's files *.kap, **.kml (as raster and vector *.svg) in local directories
     - charts can be filterd
     - force to show / hide
@@ -38,7 +39,7 @@ In core when it handle kap files it use ***imgkap** software to split kap to mhe
 
 Libraries are comming prefetchd. So are comming with viteyss-site-mapleatlet. Cas be found in `./assets` directory.
 
-[leaflet.fullscreen](https://github.com/brunob/leaflet.fullscreen) | [leaflet.filelayer.js](https://github.com/makinacorpus/Leaflet.FileLayer) | [togeojson.js](https://github.com/mapbox/togeojson) | [leaflet.js](https://leafletjs.com) | [vue.js](https://vuejs.org/)
+[leaflet.fullscreen](https://github.com/brunob/leaflet.fullscreen) | [leaflet.filelayer.js](https://github.com/makinacorpus/Leaflet.FileLayer) | [togeojson.js](https://github.com/mapbox/togeojson) | [leaflet.js](https://leafletjs.com) | [vue.js](https://vuejs.org/) | [leaflet.TileLayer.Fallback](https://github.com/ghybs/Leaflet.TileLayer.Fallback/tree/master)
 
 
 ### charts local file system
@@ -67,12 +68,13 @@ Example will be init of main `mapioMapio.vue` to `div`
 
 ```js
     this.mioApp = createApp( MapioMapio,  
-    {'mapname':"mio",  // < -- name must be `id` name skeam ok
+    {'mapname':"mio",  //       < -- name must be `id` name skeam ok
         'mapOpts':{'abc':1,
             'zoomControl': false,
             'center': [9.2620320938,-79.9355079], 'zoom':12
         },
         'addFullScreenBt': true,
+        'addFallbackTiles': false, 
         'fileLoad': false, 'homeUrl': this.homeUrl,  
         'addlfBaseMaps': true} ).mount('#lfmapio');
 

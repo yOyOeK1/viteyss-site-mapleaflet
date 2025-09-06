@@ -51,6 +51,7 @@ class s_vysmapleafletPage{
     <script src="${this.homeUrl}assets/leaflet.filelayer.js"></script>
     <link rel="stylesheet" href="${this.homeUrl}assets/leaflet.fullscreen.Control.FullScreen.css">
     <script src="${this.homeUrl}assets/leaflet.fullscreen.Control.FullScreen.js"></script>
+    <script src="${this.homeUrl}assets/leaflet.tilelayer.fallback.js"></script>
 <!--
     <b>${this.getName}</b><br>
     <img src="${this.homeUrl}assets/ico_viteyss_32.png"><br>
@@ -101,6 +102,7 @@ class s_vysmapleafletPage{
         {'mapname':"mioMap2", 
             'mapioDirs': true,
             'addFullScreenBt': true,
+            'addFallbackTiles': false,
             'fileLoad': true, 'homeUrl': this.homeUrl,  
             'addlfBaseMaps': false} ).mount('#lfmapio2');
 

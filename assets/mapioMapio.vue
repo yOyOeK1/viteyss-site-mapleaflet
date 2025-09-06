@@ -18,14 +18,16 @@ export default{
         'mapOpts': { default: { center: [9.2620320938,-79.9355079], zoom:12 } },
         'mapioDirs': { type: Boolean, default: false },
         'addFullScreenBt': { type: Boolean, default: false }, // fullscreen button next to zoom
+        'addFallbackTiles': { type: Boolean, default: true }
     },
     data(){
         let map = ref();
         let control = ref();
         let fsControl = ref(); // fullscreen controls
         let conFileLoad = ref();
+        let tilesFallback = ref();
 
-        return { map, control, fsControl, conFileLoad };
+        return { map, control, fsControl, conFileLoad, tilesFallback };
     },
     methods:{
         doEcho(){
@@ -41,6 +43,22 @@ export default{
         
         console.log('log concat mapOptions');
         this.map = L.map( this.mapname, this.mapOpts);
+
+        if( this.addFallbackTiles ){
+            this.tilesFallback = L.tileLayer.fallback('/apis/mapleaflet/osmCyclosm/{z}/{x}/{y}', {
+                minNativeZoom: 4,
+                maxNativeZoom: 19,
+                minZoom: 3,
+                maxZoom: 22,
+                attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+                errorTileUrl: `${this.homeUrl}assets/leaflet.TileLayer.Fallback.no-tile.png`
+            });
+
+
+            this.tilesFallback.addTo( this.map );
+
+        }
+
 
         if( this.addlfBaseMaps ){
             this.control = L.control.layers( lfBaseMaps( this.map ), 
