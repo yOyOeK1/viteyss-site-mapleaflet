@@ -1,5 +1,5 @@
 
-function lcFileGpxLoad( map ){
+function lcFileGpxLoad( map, control ){
 
     let contfl = L.Control.fileLayerLoad({
         // Allows you to use a customized version of L.geoJson.
@@ -23,9 +23,17 @@ function lcFileGpxLoad( map ){
 
     contfl.loader.on('data:loaded', function (event) {
         // event.layer gives you access to the layers you just uploaded!
-
         // Add to map layer switcher
-       // map.addOverlay(event.layer, event.filename);
+        //map.addOverlay
+        //console.log('event',event, '\n\nfile:',event.filename);
+        //event.layer.removeFrom( map );
+        control.addOverlay(
+            //L.layerGroup({"customID":Math.random()}), 
+            event.layer,
+            `trak - ${event.filename}`
+            );
+        //event.layer.addTo( map );
+        
     });
 
     contfl.loader.on('data:error', function (error) {

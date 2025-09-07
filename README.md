@@ -110,8 +110,8 @@ Example will be init of main `mapioMapio.vue` to `div`
 
 ### to fix
 
-- [ ] file load gpx will not add track to overlayer list. shoud? 
 - [ ] map tile fallback now will looc in CyclOSM tiles.
     so if you have black tiles now in offline white tiles can show up 
+- [x] file load gpx will not add track to overlayer list.
 
 

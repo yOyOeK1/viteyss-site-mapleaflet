@@ -1,6 +1,6 @@
 import MapioMapio from "./assets/mapioMapio.vue";
 import MapioMapsPanel from "./assets/mapioMapsPanel.vue";
-import { contextMenuSimple } from "./contextMenuSimple";
+import { contextMenuSimple, setMapObject } from "./contextMenuSimple";
 import { lcFileGpxLoad } from "./lcFileGpx";
 import { lfBaseMaps } from "./lfBaseMaps";
 import { lfMakeIconClickable } from "./lfMakeIconClickable";
@@ -91,7 +91,7 @@ class s_vysmapleafletPage{
     cl(`${this.getName} - getHtmlAfterLoad()`);
     
 
-
+    let contextMenuObj = contextMenuSimple( this.homeUrl );
     
     //setTimeout(()=>{
       this.mioApp = createApp( MapioMapio,  
@@ -102,7 +102,7 @@ class s_vysmapleafletPage{
             },
             'fileLoad': false, 'homeUrl': this.homeUrl,  
             'addlfBaseMaps': true,
-            'addContextMenu': contextMenuSimple( this.homeUrl ),            
+            'addContextMenu': contextMenuObj,
           } ).mount('#lfmapio');
       this.mioApp1 = createApp( MapioMapio, 
         {'mapname':"mioMap2", 
@@ -112,6 +112,7 @@ class s_vysmapleafletPage{
             'fileLoad': true, 'homeUrl': this.homeUrl,  
             'addlfBaseMaps': false} ).mount('#lfmapio2');
 
+      setMapObject( pager._page.mioApp.$data.map );
 
 
       // bind move 
