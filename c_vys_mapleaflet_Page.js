@@ -5,6 +5,7 @@ import { lcFileGpxLoad } from "./lcFileGpx";
 import { lfBaseMaps } from "./lfBaseMaps";
 import { lfMakeIconClickable } from "./lfMakeIconClickable";
 import { lfMakeKmPanel } from "./lfMakeKmPanel";
+import { lfMakeSmallLatLonToClipboard } from "./lfMakeSmallLatLonBanToClipBoard";
 import { lfOverLayMaps } from "./lfoverlayMaps";
 import onlineMaps from "./onlineMaps";
 import { createApp } from 'vue';
@@ -105,7 +106,8 @@ class s_vysmapleafletPage{
               'zoomControl': false,
               'center': [9.2620320938,-79.9355079], 'zoom':12
             },
-            'fileLoad': false, 'homeUrl': this.homeUrl,  
+            'fileLoad': false, 'homeUrl': this.homeUrl, 
+            'addSmallLatLon': true, 
             'addlfBaseMaps': true,
             //'addGrid': true,
             'addContextMenu': contextMenuObj,
@@ -123,38 +125,8 @@ class s_vysmapleafletPage{
       setMapObject( pager._page.mioApp.$data.map );
 
       // new panel 
-      lfMakeKmPanel( this.mioApp.map, this.homeUrl, 'divmAp',{ 
-        'position':[15,12],
-        mapCornerPosition: 'bottomright',
-        'onClickCallBack': (e)=>{
-          console.log('lat,lon click',e);
-          let mapCenterll = this.mioApp.$data.map.getCenter();
-          let msg = `${mapCenterll.lat},${mapCenterll.lng}`
-          navigator.clipboard.writeText(msg);
-          $.toast('In clipboard: '+`${msg}`);
-        }
-      });
-      $('.divmAp').css({
-        'border':'solid 1px gray',
-        'border-radius': '3px',
-        'background-color': '#ffffff33',
-        'padding-left': '3px',
-        'padding-right': '10px'
-      });
-
-
-      this.updateSmallLatLon = ( e ='')=>{
-        $('.divmAp').html( `
-        <div style="text-align:right;">
-          <small>${this.ll.last.lat.toFixed(7)} ${this.ll.last.lng.toFixed(7)}</small>
-        </div>
-        `);
-      }
-      this.mioApp.$data.map.on( 'moveend', this.updateSmallLatLon );
-      this.ll['last'] = this.mioApp.$data.map.getCenter();
-      this.ll['zoom'] = this.mioApp.$data.map.getZoom();
-      this.updateSmallLatLon();
-
+      
+      
 
       // bind move 
       if( 1 ){

@@ -75,6 +75,7 @@ Example will be init of main `mapioMapio.vue` to `div`
             'zoomControl': false,
             'center': [9.2620320938,-79.9355079], 'zoom':12
         },
+        'addSmallLatLon': true, 
         'addFullScreenBt': true,
         'addFallbackTiles': false, 
         'addGrid': true,
