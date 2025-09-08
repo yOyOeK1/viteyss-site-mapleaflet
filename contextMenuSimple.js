@@ -1,5 +1,88 @@
 
 
+class miMesureDist{
+    constructor(){
+        this.p0 = -1;
+        this.m0 = L.marker([0,0],{
+            draggable: true,
+            title: 'From '
+        });
+        this.m0.on('dragend',(e)=>{
+            this.p0 = this.m0.getLatLng();
+            this.rebuild();
+        });
+        this.m0.on('dragstart',(e)=>{ this.line.removeFrom( _map ); } );
+
+        this.p1 = -1;
+        this.m1 = L.marker([0,0],{
+            draggable: true,
+            title: 'To '
+        });
+        this.m1.on('dragend',(e)=>{
+            this.p1 = this.m1.getLatLng();
+            this.rebuild();
+        });
+        this.m1.on('dragstart',(e)=>{ this.line.removeFrom( _map ); } );
+
+        this.line = L.polyline( [ this.p0, this.p1 ], {
+            color: 'orange'
+        } );
+    }
+
+
+    setP0=(latlng)=>{
+        if( this.p0 != -1 ){
+            this.m0.removeFrom( _map );
+            this.p0 = -1;
+           
+        }
+        if( this.p1 != -1 ){
+            this.m1.removeFrom( _map );
+            this.p1 = -1;
+            this.line.removeFrom( _map );
+        }
+        
+
+        this.p0 = latlng;
+        this.m0.setLatLng( this.p0 ).addTo( _map );
+    }
+
+    setP1=(latlng)=>{
+
+        if( this.p1 != -1 ){
+            this.m1.removeFrom( _map );
+            this.p1 = -1;
+            this.line.removeFrom( _map );
+        }
+        
+        this.p1 = latlng;
+        this.m1.setLatLng( this.p1 ).addTo( _map );
+        this.line.setLatLngs( [ this.p0, this.p1 ], {
+            color: 'orange'
+        } ).addTo( _map );
+    }
+
+    rebuild=()=>{
+        if( this.p1 != -1 ){
+            this.line.removeFrom( _map );
+        }        
+        
+        this.m1.setLatLng( this.p1 ).addTo( _map );
+        this.line.setLatLngs( [ this.p0, this.p1 ], {
+            color: 'orange'
+        } ).addTo( _map );
+        this.getDist();
+    }
+
+    getDist=()=>{
+        let dist = _map.distance( this.p0, this.p1 ).toFixed(2)+' met.'
+        this.line.bindPopup( `length:\n ${dist}`).openPopup();
+        return dist;
+    }
+}
+
+let miMesDis;
+
 function showCoordinates (e) {
     //alert(e.latlng);
     $.toast({
@@ -82,13 +165,29 @@ let contextMenuSimple = function(  homeUrl ) {
 
         contextmenu: true,
         contextmenuWidth: 140,
-        contextmenuItems: [{
+        contextmenuItems: [
+        {
+            text: 'mesure From',
+            callback: (e)=>{ 
+                if( miMesDis == undefined )
+                    miMesDis = new miMesureDist();
+                miMesDis.setP0( e.latlng ); 
+            }
+        }, {
+            text: 'To',
+            callback: (e)=>{ 
+                miMesDis.setP1( e.latlng ); 
+                $.toast('distance: '+miMesDis.getDist() );
+            }
+        },'-',
+        {
             text: 'Show coordinates',
             callback: showCoordinates
         }, {
             text: 'Center map here',
             callback: centerMap
-        }, '-', {
+        }, '-', 
+        {
             text: 'Zoom in',
             icon: `${homeUrl}assets/zoom-in.png`,
             callback: zoomIn

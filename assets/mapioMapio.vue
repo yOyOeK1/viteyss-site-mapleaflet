@@ -115,8 +115,9 @@ export default{
             this.mPanel.mount( `.${mPanelDivName}` );
             //window['mPanel'] = this.mPanel;
             this.map.on( 'moveend', (e='')=>{
-                console.log('moveend ....');
+                console.log('moveend 7 ....');
                 this.mPanel._instance.ctx.onMoveDoneEvent( {'lfmap':this.map} );
+                console.log('moveend 7 ....END');
             });
             this.map.on('overlayadd',(e='')=>{
                 console.log('overlayadded ....');

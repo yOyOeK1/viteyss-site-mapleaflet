@@ -29,7 +29,8 @@ First draft `25090610`
 - help grid of lat, lng
 - copy lat,lng location to clipboard
 - gui widget's with options. Look section options `on init`
-
+- context menu
+    - [x] menure distance
 
 ### dependency
 
@@ -108,11 +109,19 @@ Settings files can be found in project directory:
 `./examples/SASPlanet_settings/Aing_Sat.zmp`
 
 
+#### context menu tools
+
+*mesure distance*
+
+![](./examples/screen_menucontextMesure_v1.png)
+
+POI's are dragable.
+
 
 ### ideas
 
 - [ ] button slots
-- [ ] mesure distance / bearing
+- [1/2] mesure distance / bearing
     * https://ppete2.github.io/Leaflet.PolylineMeasure/demo1.html
     * https://blog.cyclemap.link/Leaflet.Geodesic/basic-interactive.html
 - [ ] track from client ico uniformd
