@@ -70,12 +70,12 @@ L.LatLngGraticule = L.Layer.extend({
 
         map._panes.overlayPane.appendChild(this._container);
 
-        map.on('viewreset', this._reset, this);
-        map.on('move', this._reset, this);
+        //map.on('viewreset', this._reset, this);
+        //map.on('move', this._reset, this);
         map.on('moveend', this._reset, this);
 
         if (map.options.zoomAnimation && L.Browser.any3d) {
-            map.on('zoomanim', this._animateZoom, this);
+            //map.on('zoomanim', this._animateZoom, this);
         }
 
         this._reset();
@@ -84,12 +84,12 @@ L.LatLngGraticule = L.Layer.extend({
     onRemove: function (map) {
         map.getPanes().overlayPane.removeChild(this._container);
 
-        map.off('viewreset', this._reset, this);
-        map.off('move', this._reset, this);
+        //map.off('viewreset', this._reset, this);
+        //map.off('move', this._reset, this);
         map.off('moveend', this._reset, this);
 
         if (map.options.zoomAnimation) {
-            map.off('zoomanim', this._animateZoom, this);
+            //map.off('zoomanim', this._animateZoom, this);
         }
     },
 

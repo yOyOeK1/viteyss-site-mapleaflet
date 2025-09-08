@@ -9,8 +9,8 @@ export default function ( map, mapname ){
     if( urlArgs[ mapname] ){
         let j = JSON.parse( urlArgs[ mapname ] );
         let ll = L.latLng( j['lat'],j['lng']);
-        //console.log('so '+this.mapname+' settings hash: '+JSON.stringify(j),'\nll :',ll);
-        setTimeout(()=>{map.setView( ll , j['z'] );}, 750);
+        console.log('mapio urlhash restore '+mapname+' settings hash: '+JSON.stringify(j,null,4));
+        //setTimeout(()=>{map.setView( ll , j['z'] );}, 1750);
     }
 
     // set / update hash
