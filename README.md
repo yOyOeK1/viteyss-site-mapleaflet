@@ -26,6 +26,8 @@ First draft `25090610`
     - as png, svg with alpha channel
 - loads gpx, kml, ... **files to traks** on client site
 - process data to geo json
+- help grid of lat, lng
+- copy lat,lng location to clipboard
 - gui widget's with options. Look section options `on init`
 
 
@@ -39,7 +41,7 @@ In core when it handle kap files it use ***imgkap** software to split kap to mhe
 
 Libraries are comming prefetchd. So are comming with viteyss-site-mapleatlet. Cas be found in `./assets` directory.
 
-[leaflet.fullscreen](https://github.com/brunob/leaflet.fullscreen) | [leaflet.filelayer.js](https://github.com/makinacorpus/Leaflet.FileLayer) | [togeojson.js](https://github.com/mapbox/togeojson) | [leaflet.js](https://leafletjs.com) | [vue.js](https://vuejs.org/) | [leaflet.TileLayer.Fallback](https://github.com/ghybs/Leaflet.TileLayer.Fallback/tree/master) | [leaflet.contextmenu](https://aratcliffe.github.io/Leaflet.contextmenu/examples/index.html)
+[leaflet.fullscreen](https://github.com/brunob/leaflet.fullscreen) | [leaflet.filelayer.js](https://github.com/makinacorpus/Leaflet.FileLayer) | [togeojson.js](https://github.com/mapbox/togeojson) | [leaflet.js](https://leafletjs.com) | [vue.js](https://vuejs.org/) | [leaflet.TileLayer.Fallback](https://github.com/ghybs/Leaflet.TileLayer.Fallback/tree/master) | [leaflet.contextmenu](https://aratcliffe.github.io/Leaflet.contextmenu/examples/index.html) | [leaflet.latlng-graticule.js](https://github.com/Leaflet/Leaflet.Graticule?tab=readme-ov-file)
 
 
 ### charts local file system
@@ -75,6 +77,7 @@ Example will be init of main `mapioMapio.vue` to `div`
         },
         'addFullScreenBt': true,
         'addFallbackTiles': false, 
+        'addGrid': true,
         'addContextMenu': contextMenuSimple( this.homeUrl ), // look as a example
         'fileLoad': false, 'homeUrl': this.homeUrl,  
         'addlfBaseMaps': true} ).mount('#lfmapio');
@@ -87,6 +90,19 @@ Example will be init of main `mapioMapio.vue` to `div`
 
     ![](./examples/screen_menucontextSimple.png)
     *contextMenuSimple.js* show simple menu and options for customization.
+
+
+### about proxy
+
+Proxy it's is in beatwean you and internet. Only for time when you look for map's with it, will downlad what you need to have on the map as tiles. Provide you with needed tiles and store it on hard drive. But first it looks for files in a hard drive for all yours visited spots. When file is there then use this one. If file is not pressent then try to connect to internet to download it. Imitates that ther is a internet and you can see what was in stored local proxy files.
+
+
+#### using SASPlanet
+
+There is a `setting` for tile provider of local proxy. So using sasplanet you cat force it to cashe areas using it.
+Settings files can be found in project directory:
+`./examples/SASPlanet_settings/Aing_Sat.zmp`
+
 
 
 ### ideas

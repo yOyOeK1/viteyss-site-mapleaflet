@@ -26,6 +26,10 @@ class s_vysmapleafletPage{
     this.mPanel = -1;
     this.lcFileGpx = -1;
 
+    this.ll = {
+
+    };
+
   }
   
   get getName(){
@@ -55,6 +59,7 @@ class s_vysmapleafletPage{
     <script src="${this.homeUrl}assets/leaflet.tilelayer.fallback.js"></script>
     <link rel="stylesheet" href="${this.homeUrl}assets/leaflet.contextmenu.css">
     <script src="${this.homeUrl}assets/leaflet.contextmenu.js"></script>
+    <script src="${this.homeUrl}assets/leaflet.latlng-graticule.js"></script>
 <!--
     <b>${this.getName}</b><br>
     <img src="${this.homeUrl}assets/ico_viteyss_32.png"><br>
@@ -102,6 +107,7 @@ class s_vysmapleafletPage{
             },
             'fileLoad': false, 'homeUrl': this.homeUrl,  
             'addlfBaseMaps': true,
+            //'addGrid': true,
             'addContextMenu': contextMenuObj,
           } ).mount('#lfmapio');
       this.mioApp1 = createApp( MapioMapio, 
@@ -109,20 +115,56 @@ class s_vysmapleafletPage{
             'mapioDirs': true,
             'addFullScreenBt': true,
             'addFallbackTiles': false,
+            'addGrid': true,
             'fileLoad': true, 'homeUrl': this.homeUrl,  
             'addlfBaseMaps': false} ).mount('#lfmapio2');
 
+      // for context menu 
       setMapObject( pager._page.mioApp.$data.map );
+
+      // new panel 
+      lfMakeKmPanel( this.mioApp.map, this.homeUrl, 'divmAp',{ 
+        'position':[15,12],
+        mapCornerPosition: 'bottomright',
+        'onClickCallBack': (e)=>{
+          console.log('lat,lon click',e);
+          let mapCenterll = this.mioApp.$data.map.getCenter();
+          let msg = `${mapCenterll.lat},${mapCenterll.lng}`
+          navigator.clipboard.writeText(msg);
+          $.toast('In clipboard: '+`${msg}`);
+        }
+      });
+      $('.divmAp').css({
+        'border':'solid 1px gray',
+        'border-radius': '3px',
+        'background-color': '#ffffff33',
+        'padding-left': '3px',
+        'padding-right': '10px'
+      });
+
+
+      this.updateSmallLatLon = ( e ='')=>{
+        $('.divmAp').html( `
+        <div style="text-align:right;">
+          <small>${this.ll.last.lat.toFixed(7)} ${this.ll.last.lng.toFixed(7)}</small>
+        </div>
+        `);
+      }
+      this.mioApp.$data.map.on( 'moveend', this.updateSmallLatLon );
+      this.ll['last'] = this.mioApp.$data.map.getCenter();
+      this.ll['zoom'] = this.mioApp.$data.map.getZoom();
+      this.updateSmallLatLon();
 
 
       // bind move 
       if( 1 ){
         this.mioApp.$data.map.on( 'moveend', (e='')=>{
           //console.log('connect moveend ....');
-          this.mioApp1.$data.map.setView(
-            this.mioApp.$data.map.getCenter(),
-            this.mioApp.$data.map.getZoom()
-          );
+          console.log('moveend2');
+          this.ll['last'] = this.mioApp.$data.map.getCenter();
+          this.ll['zoom'] = this.mioApp.$data.map.getZoom();
+
+          this.mioApp1.$data.map.setView( this.ll['last'], this.ll['zoom'] );
          // this.mPanel._instance.ctx.onMoveDoneEvent( {'lfmap':this.map} );
         });
       }

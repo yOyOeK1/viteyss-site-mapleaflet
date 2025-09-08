@@ -281,7 +281,7 @@ export default{
             for( let mf of this.mapFolders){
                 //console.log('add current folder '+mf.name);
                 mf['o-ov'] = L.layerGroup({"customID":Math.random()});
-                window['mapioMap'] = this.mapioMap;
+                //window['mapioMap'] = this.mapioMap;
                 //pager._page.lflayCon
                 this.mapioMap.control.addOverlay( mf['o-ov'], mf.name);
                 mf['o-ov'].addTo( this.mlfmap );
