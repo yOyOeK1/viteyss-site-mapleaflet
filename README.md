@@ -69,8 +69,9 @@ Can do: *.kap, *.kml, *.svg
 Example will be init of main `mapioMapio.vue` to `div`
 
 ```js
-    this.mioApp = createApp( MapioMapio,  
-    {'mapname':"mio",  //       < -- name must be `id` name skeam ok
+this.mioApp = createApp( MapioMapio,  
+    {
+        'mapname':"mio",            // name must be `id` name skeam ok
         'mapOpts':{'abc':1,
             'zoomControl': false,
             'center': [9.2620320938,-79.9355079], 'zoom':12
@@ -81,7 +82,9 @@ Example will be init of main `mapioMapio.vue` to `div`
         'addGrid': true,
         'addContextMenu': contextMenuSimple( this.homeUrl ), // look as a example
         'fileLoad': false, 'homeUrl': this.homeUrl,  
-        'addlfBaseMaps': true} ).mount('#lfmapio');
+        'addlfBaseMaps': true,
+        'useHash': true             // urlhash to store and restore
+    } ).mount('#lfmapio');
 
         // `#lfmapio` - div where it will land 
         //              it need to provide correct style of div element

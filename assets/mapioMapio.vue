@@ -10,6 +10,7 @@ import { lcFileGpxLoad } from '../lcFileGpx';
 import MapioMapsPanel from './mapioMapsPanel.vue';
 import { lfMakeGrid } from '../lfMakeGrid';
 import { lfMakeSmallLatLonToClipboard } from '../lfMakeSmallLatLonBanToClipBoard';
+import mioHashHelper from './mioHashHelper';
 
 export default{
     props:{
@@ -23,7 +24,8 @@ export default{
         'addFullScreenBt': { type: Boolean, default: false }, // fullscreen button next to zoom
         'addFallbackTiles': { type: Boolean, default: true },
         'addContextMenu': { default: undefined }, // look leaflet.contextmenu.js
-        'addGrid': { default: false}
+        'addGrid': { default: false},
+        'useHash': { type:Boolean, default: true } // put and restore hash url
     },
     data(){
         let map = ref();
@@ -131,6 +133,14 @@ export default{
         if( this.addGrid ){
             this.olGrid = lfMakeGrid( this.map );
         }
+
+        // do hash adress start resume
+        if( this.useHash ){
+            mioHashHelper( this.map, this.mapname );
+
+        }
+
+
     }
 
 }
