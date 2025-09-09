@@ -111,6 +111,7 @@ class s_vysmapleafletPage{
             'addlfBaseMaps': true,
             //'addGrid': true,
             'addContextMenu': contextMenuObj,
+            'addOSD': true,
           } ).mount('#lfmapio');
       this.mioApp1 = createApp( MapioMapio, 
         {'mapname':"mioMap2", 
@@ -123,6 +124,15 @@ class s_vysmapleafletPage{
 
       // for context menu 
       setMapObject( pager._page.mioApp.$data.map );
+
+
+      // svg osd on map?
+      let myOlDiv = lfMakeKmPanel( this.mioApp.$data.map, this.homeUrl, 'osdDivTest' );
+      $.get( `${this.homeUrl}assets/osdMapTest1.svg`, function( data, status ){
+          siteByKey.s_multiSVGPage.o.mulSvgParseGet( data  , status, false, '.osdDivTest' );
+          
+      } );
+
 
       // new panel 
       
@@ -199,6 +209,11 @@ class s_vysmapleafletPage{
 
     },700);
     */
+
+    setTimeout(()=>{
+      sOutSend('wsClientIdent:mapio');
+
+    },1000);
   }
 
   get svgDyno(){
@@ -210,7 +225,13 @@ class s_vysmapleafletPage{
   }
 
   onMessageCallBack = ( r ) => {
-    cl( `${this.getName} [cb] - got msg `);
+    //cl( `${this.getName} [cb] - got msg `+JSON.stringify(r));
+
+    if( String(r.topic).startsWith('map/osd/') ){
+      //this.mioApp.pushToOSD( r );
+      siteByKey.s_multiSVGPage.o.onMessageCallBack( r );
+    }
+
 
   }
 

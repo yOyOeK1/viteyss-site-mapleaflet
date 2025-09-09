@@ -32,6 +32,7 @@ First draft `25090610`
 - context menu
     - [x] menure distance
 
+
 ### dependency
 
 - **imgkap** [link ...](https://github.com/nohal/imgkap)
@@ -96,6 +97,10 @@ this.mioApp = createApp( MapioMapio,
     ![](./examples/screen_menucontextSimple.png)
     *contextMenuSimple.js* show simple menu and options for customization.
 
+    * mesure distance
+        ![](./examples/screen_menucontextMesure_v1.png)
+        POI's are dragable.
+
 
 ### about proxy
 
@@ -109,13 +114,6 @@ Settings files can be found in project directory:
 `./examples/SASPlanet_settings/Aing_Sat.zmp`
 
 
-#### context menu tools
-
-*mesure distance*
-
-![](./examples/screen_menucontextMesure_v1.png)
-
-POI's are dragable.
 
 
 ### ideas
@@ -135,6 +133,14 @@ POI's are dragable.
 - [ ] overlay for gui as
     - [ ] svg
     - [ ] html
+
+
+### multiSvg as osd
+
+![](./examples/screen_mapio_osdLayer_from_multiSvg.png)
+On left **inkscape** editing svg of osd.
+Or right **viteyss** running viteyss-site-mapleaflet with svgOSD :) using power of [multiSVG from oiyshTerminal](https://github.com/yOyOeK1/oiyshTerminal/tree/main/ySS_calibration/sites/multiSVG)
+
 
 
 ### to fix

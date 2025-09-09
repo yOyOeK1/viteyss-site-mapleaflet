@@ -1,0 +1,191 @@
+[
+    {
+        "id": "09bfd5bbb50ff312",
+        "type": "tab",
+        "label": "mapio OSD",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "a228796da20319ac",
+        "type": "inject",
+        "z": "09bfd5bbb50ff312",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            },
+            {
+                "p": "t",
+                "v": "text",
+                "vt": "str"
+            }
+        ],
+        "repeat": "1",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "map/osd/Time",
+        "payload": "",
+        "payloadType": "date",
+        "x": 230,
+        "y": 140,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "437e8f0ab62e1260",
+        "type": "websocket out",
+        "z": "09bfd5bbb50ff312",
+        "name": "",
+        "server": "",
+        "client": "768c6e19adb141cb",
+        "x": 320,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "fd7a22a06bd12dc8",
+        "type": "websocket in",
+        "z": "09bfd5bbb50ff312",
+        "name": "",
+        "server": "",
+        "client": "768c6e19adb141cb",
+        "x": 320,
+        "y": 260,
+        "wires": [
+            [
+                "9320edcc6ac6c454"
+            ]
+        ]
+    },
+    {
+        "id": "9320edcc6ac6c454",
+        "type": "debug",
+        "z": "09bfd5bbb50ff312",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 460,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "0359edff9db84af3",
+        "type": "inject",
+        "z": "09bfd5bbb50ff312",
+        "name": "",
+        "props": [
+            {
+                "p": "v",
+                "v": "",
+                "vt": "date"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            },
+            {
+                "p": "t",
+                "v": "text",
+                "vt": "str"
+            }
+        ],
+        "repeat": "2",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "map/osd/time",
+        "x": 170,
+        "y": 480,
+        "wires": [
+            [
+                "437e8f0ab62e1260",
+                "cb41e23ef5a93eab"
+            ]
+        ]
+    },
+    {
+        "id": "3a58c92cda0d2697",
+        "type": "inject",
+        "z": "09bfd5bbb50ff312",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "t",
+                "v": "text",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "str",
+        "x": 130,
+        "y": 440,
+        "wires": [
+            [
+                "437e8f0ab62e1260"
+            ]
+        ]
+    },
+    {
+        "id": "cb41e23ef5a93eab",
+        "type": "function",
+        "z": "09bfd5bbb50ff312",
+        "name": "",
+        "func": "\nmsg['payload'] = `wsSendToWSID:mapio:`+JSON.stringify(msg);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 450,
+        "y": 420,
+        "wires": [
+            [
+                "437e8f0ab62e1260"
+            ]
+        ]
+    },
+    {
+        "id": "768c6e19adb141cb",
+        "type": "websocket-client",
+        "path": "wss://192.168.43.220:8080/fooWSS",
+        "tls": "96fc40495b80bd0c",
+        "wholemsg": "false",
+        "hb": "0"
+    },
+    {
+        "id": "96fc40495b80bd0c",
+        "type": "tls-config",
+        "name": "",
+        "cert": "",
+        "key": "",
+        "ca": "",
+        "certname": "",
+        "keyname": "",
+        "caname": "",
+        "servername": "",
+        "verifyservercert": false,
+        "alpnprotocol": ""
+    }
+]

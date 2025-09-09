@@ -26,7 +26,7 @@ export default function ( map, mapname ){
         for( let k of Object.keys(urlArgs) )
             h+=`&${k}=${urlArgs[k]}`
 
-        window.location.hash=h;
+        //window.location.hash=h;
         //console.log('e',e,'\nhash\n',window.location.hash,
         //    '\n\nurl:\n', urlArgs);
     });

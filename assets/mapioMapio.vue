@@ -11,6 +11,7 @@ import MapioMapsPanel from './mapioMapsPanel.vue';
 import { lfMakeGrid } from '../lfMakeGrid';
 import { lfMakeSmallLatLonToClipboard } from '../lfMakeSmallLatLonBanToClipBoard';
 import mioHashHelper from './mioHashHelper';
+import { lfMakeOSD, lfOSDpushToOSD } from '../lfMakeOSD';
 
 export default{
     props:{
@@ -25,7 +26,8 @@ export default{
         'addFallbackTiles': { type: Boolean, default: true },
         'addContextMenu': { default: undefined }, // look leaflet.contextmenu.js
         'addGrid': { default: false},
-        'useHash': { type:Boolean, default: true } // put and restore hash url
+        'useHash': { type:Boolean, default: true }, // put and restore hash url
+        'addOSD': { default: false },
     },
     data(){
         let map = ref();
@@ -35,8 +37,9 @@ export default{
         let tilesFallback = ref();
         let olGrid = ref();
         let olSmallLL = ref();
+        let olOSD = ref();
 
-        return { map, control, fsControl, conFileLoad, tilesFallback, olGrid, olSmallLL };
+        return { map, control, fsControl, conFileLoad, tilesFallback, olGrid, olSmallLL, olOSD };
     },
     methods:{
         doEcho(){
@@ -44,6 +47,11 @@ export default{
         },
         getObject( objName ){
             return this[objName];
+        },
+        pushToOSD( msg ){
+            //console.log('pushToOSD ['+this.addOSD+']: ',msg);
+            if( this.addOSD )
+                lfOSDpushToOSD(msg);
         }
     },
     mounted(){
@@ -140,6 +148,11 @@ export default{
             mioHashHelper( this.map, this.mapname );
 
         }
+
+        /*
+        if( this.addOSD )
+            this.olOSD = lfMakeOSD( this.map, this.homeUrl );
+        */
 
 
     }
