@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml><GroundOverlay><name>depthTest1.svg</name><color>88ffffff</color><Icon>
+<href>depthTest1.svg</href>
+<viewBoundScale>0.75</viewBoundScale></Icon><LatLonBox>
+<north>9.475683333</north>
+<south>9.47035026550293</south>
+<east>-78.95795</east>
+<west>-78.96834564208984</west>
+</LatLonBox></GroundOverlay></kml>

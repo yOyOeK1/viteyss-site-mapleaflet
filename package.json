@@ -13,7 +13,23 @@
   "dependencies": {
     "leaflet": "^1.9.4",
     "leaflet-auto-graticule": "^2.0.0",
+    "sqlite3": "^5.1.7",
     "undici": "^7.15.0",
     "xml-js": "^1.6.11"
+  },
+  "keykords": [
+    "viteyss-site-",
+    "yss",
+    "wsqq",
+    "leaflet",
+    "vue",
+    "kap",
+    "kml"
+  ],
+  "wsqq": {
+    "background": true,
+    "subscribe": [
+      "showOnMap"
+    ]
   }
 }

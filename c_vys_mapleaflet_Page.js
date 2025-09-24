@@ -9,12 +9,17 @@ import { lfMakeSmallLatLonToClipboard } from "./lfMakeSmallLatLonBanToClipBoard"
 import { lfOverLayMaps } from "./lfoverlayMaps";
 import onlineMaps from "./onlineMaps";
 import { createApp } from 'vue';
+import { wqHandlerr_install } from "./wqHandlers";
+import { geoJtest1 } from './workGeojson/test1.js'
+import { geoJ1 } from "./geoJsonLibs/geoj1.js";
+import { geoJ2 } from "./geoJsonLibs/geoj2.js";
 
 
 class s_vysmapleafletPage{
 
   constructor(){
 
+    this.geoJ1 = geoJtest1;
     this.lfmap = -1;
     this.lflayCon = -1;
     this.lfpanel = -1;
@@ -26,6 +31,7 @@ class s_vysmapleafletPage{
     this.mioApp1 = -1;
     this.mPanel = -1;
     this.lcFileGpx = -1;
+    wqHandlerr_install(this);
 
     this.ll = {
 
@@ -103,8 +109,13 @@ class s_vysmapleafletPage{
       this.mioApp = createApp( MapioMapio,  
         {'mapname':"mio", 
             'mapOpts':{'abc':1,
-              'zoomControl': false,
-              'center': [9.2620320938,-79.9355079], 'zoom':12
+              'zoomControl': true,
+              'center': [
+                //9.472598206607001,-78.96273136138917
+                //9.472616667,-78.962383333
+                9.471910340675768,-78.96352529525758
+                //39.7471494,-104.9998241
+                ], 'zoom':16
             },
             'fileLoad': false, 'homeUrl': this.homeUrl, 
             'addSmallLatLon': true, 
@@ -134,7 +145,78 @@ class s_vysmapleafletPage{
       } );
 
 
-      // new panel 
+
+      // load geojson
+      function onEachFeature(feature, layer) {
+        let popupContent = '';
+        let pro = feature.properties;
+
+        if (feature.properties && feature.id) {
+          popupContent = `Death: ${pro.depth} meters.<br>Id: ${feature.id} Zoom:`+pager._page.mioApp.$data.map.getZoom();
+        }
+
+        layer.bindPopup(popupContent);
+      }
+
+      //const bicycleRentalLayer = L.geoJSON([geoJtest1.bicycleRental, geoJtest1.campus], {
+      //this.depthGeoJson = L.geoJSON([geoJ1], {
+      this.depthGeoJson = L.geoJSON([geoJ2], {
+        style(feature) {
+          return feature.properties && feature.properties.style;
+        },
+
+        onEachFeature,
+
+        pointToLayer(feature, latlng) {
+          return L.circleMarker(latlng, {
+            //radius: 8,
+            //color: '#000',
+            weight: 0,
+            //opacity: 0,
+            //fillOpacity: 1,
+            //fillColor: '#ff7800',
+            
+            width:0
+          });
+
+        }
+      }).addTo(pager._page.mioApp.$data.map);
+      
+
+      pager._page.mioApp.$data.map.on('zoomend', function() {
+          var currentZoom = pager._page.mioApp.$data.map.getZoom();
+          let pixBound = pager._page.mioApp.$data.map.getPixelBounds();
+          let llBound = pager._page.mioApp.$data.map.getBounds();
+          
+          let viewH = pixBound['max'].distanceTo( pixBound['min'] );
+          let viewDist = llBound['_northEast'].distanceTo( llBound['_southWest'] );
+          
+
+          pager._page.depthGeoJson.eachLayer(function(layer) {
+              if( false && layer.feature.id == 139507 ){
+
+                console.log('point id 139507', layer );
+
+                return layer.setRadius(50);
+              }else{
+                let d = layer.feature.properties.depth/1.00;
+                let nR = mMapVal( d, 0, viewDist, 0, viewH );
+                if( d < 2.9 ){ // draft to red 
+                  nR = 10.0;
+                  return layer.setStyle( {fillColor:'red'} );
+                }else if( nR < 5.0 )
+                  nR = 10.0;
+                /*( 
+                  (parseFloat(layer.feature.properties.depth)*10.0) /
+                  (( Math.log(50000000,currentZoom) ) )
+                );*/
+                //console.log(currentZoom,"zoom  current radius: "+layer.getRadius()+" nr for "+layer.feature.properties.depth+"  "+nR);
+                return layer.setRadius( parseInt(nR) );
+              }
+          });
+      
+      });
+      // load geojson end 
       
       
 
