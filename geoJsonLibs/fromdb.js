@@ -7,7 +7,7 @@ cp /tmp/geoj2.js ./
 */
 
 var configg = {
-    'dbPath': '../conturesTest/LogDepth.db'
+    'dbPath': '/home/yoyo/Apps/viteyss-site-mapleaflet/conturesTest/LogDepth.db'
 };
 var map = {
   "_southWest": {
@@ -31,8 +31,8 @@ var db = new SQLite3.Database(configg['dbPath'], (err) => {
   }
 });
 
-function getColorToDepth( depth ){
-    let dep,r,g,b,a=255;
+function getColorToDepth( depth, onlyAlpha = false ){
+    let dep,r,g,b,a=1.0;
     if( depth<10.0 && depth>2.2 ){
         dep = ((depth-2.2)/7.8);
         r = dep;
@@ -45,7 +45,7 @@ function getColorToDepth( depth ){
         r = 0.75;
         g = 0.75;
         b = 0.99;
-        a=255;
+        a=1.0;
 
     }else if( depth>=10.0 ){
         r = 1;
@@ -54,12 +54,19 @@ function getColorToDepth( depth ){
         
     }
 
-    if( depth >= 10.0 ){
-        a = parseInt(255.00/( depth/5.00 ));
-        console.log(`depth: ${depth} a:${a}`)
+    if( depth >= 5.0 ){
+        a = 5.0/parseFloat( depth );
+        //console.log(`depth: ${depth} a:${a}`)
     }
+    if( a < 0.0  )
+        a = 0.0;
+    else if( a > 1.0 )
+        a= 1.0;
 
-    return `rgba(${parseInt(r*255.00)},${parseInt(g*255.00)},${parseInt(b*255.00)},${a})`;
+    return {
+        alpha: parseFloat(a).toFixed(2),
+        rgba: `rgb(${parseInt(r*255.00)},${parseInt(g*255.00)},${parseInt(b*255.00)})`
+    };
 }
 
 
@@ -67,6 +74,7 @@ function rowsToGeo( rows ){
     let tr = [];
 
     for( let r of rows ){
+        let colorsA = getColorToDepth( r['depth'] );
         tr.push({
             "geometry": {
                 "type": "Point",
@@ -81,12 +89,14 @@ function rowsToGeo( rows ){
                 "style": {
                     //weight: 0,
                     //color: "green",
-                    //opacity: 1,
-                    fillOpacity: 0.5,
-                    fillColor: getColorToDepth( r['depth'] )
+                    //opacity: 1.0,
+                    fillOpacity: colorsA['alpha'],
+                    fillColor: colorsA['rbg'],
+                    //color: colorsA['rbg'],
                 }
             },
-            "id": r['id']
+            "id": r['id'],
+            "xy": [ r['x_cell_id'], r['y_cell_id'] ]
         });
     }
 
@@ -94,9 +104,9 @@ function rowsToGeo( rows ){
     return tr;
 }
 
-function select2( db, mapBorders, limit = 10 ){
-    const numXCells = 20;
-    const numYCells = numXCells;
+function select2( db, mapBorders, limit = 10, callBack = undefined, wCells = 50, hCells = 50 ){
+    const numXCells = wCells;
+    const numYCells = hCells;
 
     const sqlQuery = `
    SELECT
@@ -138,24 +148,30 @@ ORDER BY
             console.error('Error selecting data:', err.message);
         
         else{
-            console.log(`results\n`,rows);
+            //console.log(`results\n`,rows);
             let toFile = {
                 "type": "FeatureCollection",
+                "cells": [ wCells, hCells],
                 "features": rowsToGeo( rows )
                 };
 
-            //console.log(JSON.stringify(toFile,null,4));
-            fs.writeFileSync('/tmp/geoj2.js', 
-                'let geoJ2 = '+
-                JSON.stringify(toFile,null,4)+
-                ';\nexport{ geoJ2 }'
-            );
+            if( callBack != undefined ){
+                callBack( toFile );
+            }else{
+
+                //console.log(JSON.stringify(toFile,null,4));
+                fs.writeFileSync('/tmp/geoj2.js', 
+                    'let geoJ2 = '+
+                    JSON.stringify(toFile,null,4)+
+                    ';\nexport{ geoJ2 }'
+                );
+            }
         }
     });
 }
 
 
-function select1( db, mapBorders, limit = 10 ){
+function select1( db, mapBorders, limit = 10, callBack = undefined ){
 
     let abcd = db.all(`select id,Lat,Lon,depth from depths
         where 
@@ -179,16 +195,26 @@ function select1( db, mapBorders, limit = 10 ){
                 "features": rowsToGeo( row )
                 };
 
-            //console.log(JSON.stringify(toFile,null,4));
-            fs.writeFileSync('/tmp/geoj1.js', 
-                'let geoJ1 = '+
-                JSON.stringify(toFile,null,4)+
-                ';\nexport{ geoJ1 }'
-            );
+            if( callBack != undefined ){
+                callBack( toFile );
+            }else{
+
+                //console.log(JSON.stringify(toFile,null,4));
+                fs.writeFileSync('/tmp/geoj1.js', 
+                    'let geoJ1 = '+
+                    JSON.stringify(toFile,null,4)+
+                    ';\nexport{ geoJ1 }'
+                );
+            }
         }
     });
     console.log('abcdb: ',abcd);
 }
 
 //select1( db, map, 20000 ); 
-select2( db, map, 20000 ); 
+//select2( db, map, 20000 ); 
+let dbSoundingsToData = {
+    getDb: db,
+    selectByRaster: select2
+};
+export { dbSoundingsToData }

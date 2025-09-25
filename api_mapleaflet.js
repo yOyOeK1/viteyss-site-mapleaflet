@@ -21,6 +21,7 @@ import { Agent, setGlobalDispatcher,ProxyAgent} from 'undici'
 import { savePhotoFromAPI } from "./fetchhttps.js";
 import { kapLookInDir } from "./kapHelp.js";
 import { kmlLookInDir } from "./kmlHelp.js";
+import { dbSoundingsToData } from "./geoJsonLibs/fromdb.js";
 
 
 
@@ -170,6 +171,35 @@ class serverMapLeaflet{
 
         }else if( bUrl.startsWith('getMapio/') ){
             return this.doGetMapio( req,res, bUrl );
+
+         }else if( bUrl.endsWith('dbSoundings') ){
+
+            let onDbDone = ( resData ) =>{
+                console.log('dbSoundings done .... ',resData.features.length);
+                res.end(JSON.stringify(resData,null,4)+"\n");
+            };
+
+
+            let hed = req.headers;
+            let ne = hed['_northeast'].substring(7, hed['_northeast'].length-2).split(',');
+            let sw = hed['_southwest'].substring(7, hed['_southwest'].length-2).split(',');
+            let cells = hed['cellsc'].split(',');
+            cells = [ parseInt(cells[0]), parseInt(cells[1]) ];
+            var map = {
+                "_southWest": {
+                    "lat": parseFloat(sw[0]),
+                    "lng": parseFloat(sw[1])
+                },
+                "_northEast": {
+                    "lat": parseFloat(ne[0]),
+                    "lng": parseFloat(ne[1])
+                }
+                };
+            this.cl(['dbSoundings .... ','cells:', cells,"mapBound:",map]);
+            let dbO = dbSoundingsToData.getDb;
+            
+            dbSoundingsToData.selectByRaster( dbO, map, 20000, onDbDone, cells[0], cells[1] );
+            return 1;
             
             
         }else if( bUrl.startsWith('mapio/getList') ){

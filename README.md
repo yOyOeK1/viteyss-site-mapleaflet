@@ -31,6 +31,7 @@ First draft `25090610`
 - gui widget's with options. Look section options `on init`
 - context menu
     - [x] menure distance
+- depth sounding overlays
 
 
 ### dependency
@@ -46,7 +47,7 @@ Libraries are comming prefetchd. So are comming with viteyss-site-mapleatlet. Ca
 [leaflet.fullscreen](https://github.com/brunob/leaflet.fullscreen) | [leaflet.filelayer.js](https://github.com/makinacorpus/Leaflet.FileLayer) | [togeojson.js](https://github.com/mapbox/togeojson) | [leaflet.js](https://leafletjs.com) | [vue.js](https://vuejs.org/) | [leaflet.TileLayer.Fallback](https://github.com/ghybs/Leaflet.TileLayer.Fallback/tree/master) | [leaflet.contextmenu](https://aratcliffe.github.io/Leaflet.contextmenu/examples/index.html) | [leaflet.latlng-graticule.js](https://github.com/Leaflet/Leaflet.Graticule?tab=readme-ov-file)
 
 
-### charts local file system
+### charts - local file system
 
 Definition where it looks for file now is in `api_mapleaflet.js` `mapioFolders` array. Add them as overlay.
 Can do: *.kap, *.kml, *.svg
@@ -60,10 +61,34 @@ Can do: *.kap, *.kml, *.svg
 **shows / hides** automaticaly chart base on `%` of area it takes on screen
 
 
+#### charts - using SASPlanet
+
+There is a `setting` for tile provider of local proxy. So using sasplanet you cat force it to cashe areas using it.
+Settings files can be found in project directory:
+`./examples/SASPlanet_settings/Aing_Sat.zmp`
+
+
 ### tracks local file system
 
 * can load file from client as overlay.
 * TODO look for local files and present them with manager
+
+
+### dbSoundings - depthLoger overlay
+
+[ working need more work ] **depthSoundings** custam geoJSON overlay showing customizable depths readings from `sonar` akt depth sounder from a `leisure water craft`
+
+    ![](./examples/screen_depthSoundings_dbSoundings_2509250846.png)
+    I did some readings and `../LogDepth.db` is sqlite3 powerd data base. Link to project [depthLoger](https://github.com/yOyOeK1/depthLoger) and my [depthLogerDB](https://github.com/yOyOeK1/depthLogerDB)
+    Do you have any reading to share ? 
+
+
+### about proxy for tiles
+
+Proxy it's is in beatwean you and internet. Only for time when you look for map's with it, will downlad what you need to have on the map as tiles. Provide you with needed tiles and store it on hard drive. But first it looks for files in a hard drive for all yours visited spots. When file is there then use this one. If file is not pressent then try to connect to internet to download it. Imitates that ther is a internet and you can see what was in stored local proxy files.
+
+Used base maps are `raster` so images with pixels. This image is calld `tile` Every image is 256x256. And from this tiles side by side row by row thay create a ilusion of a biger image of a desire map.
+
 
 
 ### options on init - xdoc
@@ -85,7 +110,8 @@ this.mioApp = createApp( MapioMapio,
         'addContextMenu': contextMenuSimple( this.homeUrl ), // look as a example
         'fileLoad': false, 'homeUrl': this.homeUrl,  
         'addlfBaseMaps': true,
-        'useHash': true             // urlhash to store and restore
+        'useHash': true,             // urlhash to store and restore
+        'depthSoundings': '../conturesTest/LogDepth.db' // db Soundings 
     } ).mount('#lfmapio');
 
         // `#lfmapio` - div where it will land 
@@ -95,30 +121,21 @@ this.mioApp = createApp( MapioMapio,
 - [x] **addContextMenu** custome menu context on right / longpress
 
     ![](./examples/screen_menucontextSimple.png)
-    *contextMenuSimple.js* show simple menu and options for customization.
+
+        *contextMenuSimple.js* show simple menu and options for customization.
+
 
     * mesure distance
+
         ![](./examples/screen_menucontextMesure_v1.png)
+
         POI's are dragable.
-
-
-### about proxy
-
-Proxy it's is in beatwean you and internet. Only for time when you look for map's with it, will downlad what you need to have on the map as tiles. Provide you with needed tiles and store it on hard drive. But first it looks for files in a hard drive for all yours visited spots. When file is there then use this one. If file is not pressent then try to connect to internet to download it. Imitates that ther is a internet and you can see what was in stored local proxy files.
-
-
-#### using SASPlanet
-
-There is a `setting` for tile provider of local proxy. So using sasplanet you cat force it to cashe areas using it.
-Settings files can be found in project directory:
-`./examples/SASPlanet_settings/Aing_Sat.zmp`
-
 
 
 
 ### ideas
 
-- [ ] button slots
+- [x] button slots
 - [1/2] mesure distance / bearing
     * https://ppete2.github.io/Leaflet.PolylineMeasure/demo1.html
     * https://blog.cyclemap.link/Leaflet.Geodesic/basic-interactive.html
@@ -129,9 +146,10 @@ Settings files can be found in project directory:
     - [ ] build track?
 - [ ] weakLock option
 - [ ] split screen option
-    - [ ] mirror location
+    - [x] mirror location
+    - [ ] way to controll it :)
 - [ ] overlay for gui as
-    - [ ] svg
+    - [x] svg
     - [ ] html
 
 
