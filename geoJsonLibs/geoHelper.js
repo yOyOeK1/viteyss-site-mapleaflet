@@ -53,7 +53,7 @@ function getLgeoJSON( map, dataG, cells = [3,3], cellSize = 50  ){
             let pro = feature.properties;
             //console.log('getLgeoJSON / eachFuture '+feature);
             if (feature.properties && feature.id) {
-                popupContent = `Death: ${pro.depth} meters.<br>Id: ${feature.id}`;
+                popupContent = `Depth: ${pro.depth} meters.<br>Id: ${feature.id}`;
             }
            
             layer.bindPopup(popupContent);

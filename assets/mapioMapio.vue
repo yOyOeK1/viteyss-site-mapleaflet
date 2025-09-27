@@ -12,7 +12,7 @@ import { lfMakeGrid } from '../lfMakeGrid';
 import { lfMakeSmallLatLonToClipboard } from '../lfMakeSmallLatLonBanToClipBoard';
 import mioHashHelper from './mioHashHelper';
 import { lfMakeOSD, lfOSDpushToOSD } from '../lfMakeOSD';
-import { geoHelper } from '../geoJsonLibs/geoHelper';
+import { depthSoundinOverLay } from '../geoJsonLibs/depthSoundingHelp';
 //import { dbSoundingsToData } from '../geoJsonLibs/fromdb';
 
 export default{
@@ -30,7 +30,7 @@ export default{
         'addGrid': { default: false},
         'useHash': { type:Boolean, default: true }, // put and restore hash url
         'addOSD': { default: false },
-        'depthSoundings': { type: String, default: "" }
+        'depthSoundings': { default: "" }
     },
     data(){
         let map = ref();
@@ -41,11 +41,11 @@ export default{
         let olGrid = ref();
         let olSmallLL = ref();
         let olOSD = ref();
-        let LgeoJsonDbDepths = ref(-1);
-        let dbSoundingsRun = ref(0);
+        let LgeoJsonDbDepths = ref(Object());
+        //let dbSoundingsRun = ref(0);
 
         return { map, control, fsControl, conFileLoad, tilesFallback, olGrid, olSmallLL, olOSD,
-            LgeoJsonDbDepths, dbSoundingsRun
+            LgeoJsonDbDepths, //dbSoundingsRun
          };
     },
     methods:{
@@ -150,82 +150,7 @@ export default{
 
         //// depth soundings 
         if( this.depthSoundings != '' ){
-
-            let gridCellSize = 20;
-            this.dbSoundingsRun = 1;
-            let overLayName = 'dbSoundings';
-            
-
-            var depthSoundingUpdate = () => {
-                //dbSoundingsToData.selectByRaster( this.depthSoundings, this.map.getB, onDbDone );
-                let mapB = this.map.getBounds();
-                mapB['cellsc'] = geoHelper.getCellsCount( this.map, gridCellSize );
-
-                
-                let fetchMapiosList = async function(){
-                    let resp = await fetch('/apis/mapleaflet/dbSoundings',{ headers: mapB });
-                    if( !resp.ok ){
-                        this.status = 'can\'t get list';
-                        return 'error';
-                    }else{
-                        return await resp.json();
-                    }
-                    
-                }
-                
-                fetchMapiosList().then(data=>{
-                    //console.log('have list !!!', data);
-                    if( data != 'error' ){
-                        console.log('have dbSoundings ...');
-                        if( this.LgeoJsonDbDepths == -1 ){
-                            this.LgeoJsonDbDepths = geoHelper.getLgeoJSONFramData( this.map, data, mapB['cellsc'], gridCellSize );
-                            this.LgeoJsonDbDepths.addTo( this.map );
-                            geoHelper.doResizeLayers( this.map, this.LgeoJsonDbDepths );
-                            this.control.addOverlay( this.LgeoJsonDbDepths, overLayName );
-                        }
-
-
-                        if( this.LgeoJsonDbDepths != -1 ){
-                            console.log('have old geo depths....');
-                            this.LgeoJsonDbDepths.clearLayers();
-                            //this.control.removeLayer( this.LgeoJsonDbDepths );
-                            this.LgeoJsonDbDepths.addData( data );
-                            geoHelper.doResizeLayers( this.map, this.LgeoJsonDbDepths );                            
-                            
-                        }
-
-                    }
-                });
-
-
-                let dbSoundingsChkOverlayStatus = ( e )=>{
-                    if( e['type'] == 'overlayadd' ){
-                        this.dbSoundingsRun = 1;
-                    }else if( e['type'] == 'overlayremove' ){
-                        this.dbSoundingsRun = 0;
-                    }
-                                        
-                };
-
-
-                this.map.on('overlayadd',(e='')=>{
-                    console.log('overlayadded of dbSoundings ....');
-                    dbSoundingsChkOverlayStatus(e);
-                });
-                this.map.on('overlayremove',(e='')=>{
-                    console.log('overlayremove of dbSoundings ....');
-                    dbSoundingsChkOverlayStatus(e);
-                });
-
-            };
-
-            
-            this.map.on( 'moveend', (e='')=>{
-                if( this.dbSoundingsRun == 1 )
-                    depthSoundingUpdate();
-            });
-  
-            depthSoundingUpdate();
+            this.LgeoJsonDbDepths = depthSoundinOverLay( this.map, this.control );
         }
         //// depth soundings 
 
