@@ -4,7 +4,7 @@
 </template>
 <script>
 import { ref, createApp } from 'vue';
-import { lfBaseMaps } from '../lfBaseMaps';
+import { lfBaseMaps , lfBaseBapsAttribution } from '../lfBaseMaps';
 import { lfMakeKmPanel } from '../lfMakeKmPanel';
 import { lcFileGpxLoad } from '../lcFileGpx';
 import MapioMapsPanel from './mapioMapsPanel.vue';
@@ -13,7 +13,9 @@ import { lfMakeSmallLatLonToClipboard } from '../lfMakeSmallLatLonBanToClipBoard
 import mioHashHelper from './mioHashHelper';
 import { lfMakeOSD, lfOSDpushToOSD } from '../lfMakeOSD';
 import { depthSoundinOverLay } from '../geoJsonLibs/depthSoundingHelp';
+import CSettings from '../compSettings/cSettings.vue';
 //import { dbSoundingsToData } from '../geoJsonLibs/fromdb';
+
 
 export default{
     props:{
@@ -42,10 +44,14 @@ export default{
         let olSmallLL = ref();
         let olOSD = ref();
         let LgeoJsonDbDepths = ref(Object());
-        //let dbSoundingsRun = ref(0);
+        let depthSouningO = ref(Object());
 
         return { map, control, fsControl, conFileLoad, tilesFallback, olGrid, olSmallLL, olOSD,
-            LgeoJsonDbDepths, //dbSoundingsRun
+            LgeoJsonDbDepths, depthSouningO,//dbSoundingsRun
+            cSettings: ref(Object()),
+            settingsOn: false,
+            confT1: ref(Object()),
+            mapll: ref({lat:0.0, lng:0.0}),
          };
     },
     methods:{
@@ -61,6 +67,15 @@ export default{
                 lfOSDpushToOSD(msg);
         }
     },
+
+    computed:{
+        getLastLat(){
+            return this.mapll['lat'];
+        },
+        getLastLng(){
+            return this.mapll['lng'];
+        }
+    },
     mounted(){
         console.log('mounted:'+this.mapname);
 
@@ -73,8 +88,30 @@ export default{
             }
         }
 
+        console.log('mapio ['+this.mapname+'] opts: '+JSON.stringify(this.mapOpts,null,2));
 
         this.map = L.map( this.mapname, this.mapOpts);
+        
+
+        // for settings update ui if open settings
+        let mapC = this.map.getCenter();
+        this.mapll['lat'] = mapC['lat'];
+        this.mapll['lng'] = mapC['lng'];
+        this.map.on( 'moveend', (e='')=>{
+            let mapC = this.map.getCenter();
+            this.mapll.lat = mapC['lat'];
+            this.mapll.lng = mapC['lng'];
+
+            if( this.settingsOn && setOpts.isOpen ){
+                this.confT1[0].fields[0].text = mapC['lat'];
+                this.confT1[0].fields[1].text = mapC['lng'];
+            }
+            if( this.settingsOn && setOpts.isOpen == false ){
+                this.settingsOn = false;
+            }
+
+        });
+        // for settings update ui if open settings END
 
         if( this.addFallbackTiles ){
             this.tilesFallback = L.tileLayer.fallback('/apis/mapleaflet/osmCyclosm/{z}/{x}/{y}', {
@@ -89,7 +126,12 @@ export default{
             this.tilesFallback.addTo( this.map );
         }
 
-        
+        // use setOpts as settings
+        if(1){
+            let setOptR = setOpts.methods.restoreSettings( 'mapio_'+this.mapname );
+        }
+        // use setOpts as settings
+
 
 
         if( this.addlfBaseMaps ){
@@ -146,11 +188,9 @@ export default{
         }
 
 
-
-
         //// depth soundings 
         if( this.depthSoundings != '' ){
-            this.LgeoJsonDbDepths = depthSoundinOverLay( this.map, this.control );
+            this.depthSouningO = new depthSoundinOverLay( this.map, this.control );
         }
         //// depth soundings 
 
@@ -173,6 +213,78 @@ export default{
         */
 
 
+
+        // settings
+        if(1){
+            let kName = 'osdDivSettings'+this.mapname
+            let mySettDiv = lfMakeKmPanel( this.map, this.homeUrl, kName );
+            $('.'+kName).html(`<button id="${kName}Open">stgs</button>`);
+
+            $('#'+kName+'Open').on('click',()=>{
+                //setOpts.methods.openPanel();
+                
+                let llzoom = map.getZoom();
+                let zoomSetIs = llzoom;
+
+                let onSettingsChange = (ev='', value='')=>{
+                    this.map.setZoom(value);
+                };
+
+                this.confT1 = ref([
+                    { 
+                        name: 'Map at',
+                        fields: [
+                            { name: "lat",      text: this.getLastLat },
+                            { name: "lng",      text: this.getLastLng },
+                            { name: "Zoom",     range: true, min:1, max:22, step:1, value:zoomSetIs, callBackF:onSettingsChange }
+                        ]
+                     },
+                     { 
+                        name: 'Mapio - settings',
+                        desc: "Setting of map ("+this.mapname+")",
+                       
+                     },
+                     { 
+                        name: 'Maps attributions',
+                        html: lfBaseBapsAttribution.join("<br>"),
+                       
+                     }
+                ]);
+
+
+                if( this.depthSoundings != "" ){
+
+                    let onSettingsChangeDBSoundigRaster = (ev='', value='')=>{
+                        console.log('dbSoundigRaster', value);
+                        this.depthSouningO.setGridCellSize( value );
+                    };
+                    let onSettingsChangeDBSoundigMinDepth = (ev='',val='')=>{
+                        console.log('dbSounding new min depth',val);
+                        this.depthSouningO.geoH.minDepth = parseFloat(val);
+                        this.depthSouningO.depthSoundingUpdate();
+                    }
+
+                    this.confT1.splice(1,0,{ 
+                        name: 'dbSoundings',
+                        fields: [
+                            { name: "db sources",          filesList: true, value:this.depthSoundings, desc: "Paths to files *.sqlit3 with depth sounding logs. Separate paths with [,] comma."   },
+                            { name: "raster size",          range: true, min:4, max:50, step:1, value:this.depthSouningO.gridCellSize, callBackF:onSettingsChangeDBSoundigRaster },
+                            { name: "min depth (meters)",     range: true, min:0.1, max:10, step:0.1, value:2.6, callBackF:onSettingsChangeDBSoundigMinDepth }
+                        ]
+                     });
+
+                }
+
+                //window['confT1_'+this.mapname] = this.confT1;
+                setOpts.methods.openPanelWithConfig( this.confT1 );
+                this.settingsOn = true;
+            });
+
+        }
+        // settings
+
+
+
     }
 
 }
@@ -181,5 +293,9 @@ export default{
 .mioMap{
     width: 100vw; 
     min-height: 50vh;
+}
+
+.leaflet-bottom,.leaflet-top{
+    z-index: 997 !important;
 }
 </style>

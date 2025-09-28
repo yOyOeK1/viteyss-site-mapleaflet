@@ -38,7 +38,11 @@ function lfMakeSmallLatLonToClipboard (map, homeUrl) {
     map.on( 'moveend', updateSmallLatLon );
     updateSmallLatLon();
 
-    return this;
+    return {
+        'this':this,
+        'll': ll
+
+    };
 
 }
 

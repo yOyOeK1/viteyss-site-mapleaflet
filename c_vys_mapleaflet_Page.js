@@ -15,6 +15,7 @@ import { geoJ1 } from "./geoJsonLibs/geoj1.js";
 import { geoJ2 } from "./geoJsonLibs/geoj2.js";
 
 
+
 class s_vysmapleafletPage{
 
   constructor(){
@@ -108,7 +109,8 @@ class s_vysmapleafletPage{
     //setTimeout(()=>{
       this.mioApp = createApp( MapioMapio,  
         {'mapname':"mio", 
-            'mapOpts':{'abc':1,
+            'mapOpts':{
+              'abc':1,
               'zoomControl': true,
               'center': [
                 //9.472598206607001,-78.96273136138917
@@ -117,14 +119,18 @@ class s_vysmapleafletPage{
                 //9.471910340675768,-78.96352529525758
                 9.562813071565845,-78.86047482490541
                 //39.7471494,-104.9998241
-                ], 'zoom':16
+                ], 
+              'zoom':16,
             },
-            'fileLoad': false, 'homeUrl': this.homeUrl, 
+            //'fileLoad': false, 
+            'homeUrl': this.homeUrl, 
             'addSmallLatLon': true, 
             'addlfBaseMaps': true,
-            //'addGrid': true,
+            'addFullScreenBt': false,
+            'addFallbackTiles': false,
+            'addGrid': false,
             'addContextMenu': contextMenuObj,
-            'addOSD': true,
+            'addOSD': false,
             'depthSoundings': '../conturesTest/LogDepth.db'
           } ).mount('#lfmapio');
       this.mioApp1 = createApp( MapioMapio, 
@@ -133,7 +139,8 @@ class s_vysmapleafletPage{
             'addFullScreenBt': true,
             'addFallbackTiles': false,
             'addGrid': true,
-            'fileLoad': true, 'homeUrl': this.homeUrl,  
+            'fileLoad': true, 
+            'homeUrl': this.homeUrl,  
             'addlfBaseMaps': false,
             'depthSoundings': '../conturesTest/LogDepth.db'
           
@@ -144,101 +151,35 @@ class s_vysmapleafletPage{
 
 
       // svg osd on map?
-      let myOlDiv = lfMakeKmPanel( this.mioApp.$data.map, this.homeUrl, 'osdDivTest' );
-      $.get( `${this.homeUrl}assets/osdMapTest1.svg`, function( data, status ){
-          siteByKey.s_multiSVGPage.o.mulSvgParseGet( data  , status, false, '.osdDivTest' );
-          
-      } );
-
-
-
       if(0){
-        // load geojson 
-
-        function onEachFeature(feature, layer) {
-          let popupContent = '';
-          let pro = feature.properties;
-
-          if (feature.properties && feature.id) {
-            popupContent = `Death: ${pro.depth} meters.<br>Id: ${feature.id}`;
-          }
-
-          layer.bindPopup(popupContent);
-        }
-
-        //const bicycleRentalLayer = L.geoJSON([geoJtest1.bicycleRental, geoJtest1.campus], {
-        //this.depthGeoJson = L.geoJSON([geoJ1], {
-        this.depthGeoJson = L.geoJSON([geoJ2], {
-          style(feature) {
-            return feature.properties && feature.properties.style;
-          },
-
-          onEachFeature,
-
-          pointToLayer(feature, latlng) {
-            return L.circleMarker(latlng, {
-              //radius: 8,
-              //color: '#000',
-              weight: 0,
-              //opacity: 0,
-              //fillOpacity: 1,
-              //fillColor: '#ff7800',
-              
-              width:0
-            });
-
-          }
-        }).addTo(pager._page.mioApp.$data.map);
-        
-
-        pager._page.mioApp.$data.map.on('zoomend', function() {
-            var currentZoom = pager._page.mioApp.$data.map.getZoom();
-            let pixBound = pager._page.mioApp.$data.map.getPixelBounds();
-            let llBound = pager._page.mioApp.$data.map.getBounds();
-            
-            let viewH = pixBound['max'].distanceTo( pixBound['min'] );
-            let viewDist = llBound['_northEast'].distanceTo( llBound['_southWest'] );
-            
-
-            pager._page.depthGeoJson.eachLayer(function(layer) {
-                if( false && layer.feature.id == 139507 ){
-
-                  console.log('point id 139507', layer );
-
-                  return layer.setRadius(50);
-                }else{
-                  let d = layer.feature.properties.depth/1.00;
-                  let nR = mMapVal( d, 0, viewDist, 0, viewH );
-                  if( d < 2.9 ){ // draft to red 
-                    nR = 10.0;
-                    return layer.setStyle( {fillColor:'red'} );
-                  }else if( nR < 5.0 )
-                    nR = 10.0;
-                  /*( 
-                    (parseFloat(layer.feature.properties.depth)*10.0) /
-                    (( Math.log(50000000,currentZoom) ) )
-                  );*/
-                  //console.log(currentZoom,"zoom  current radius: "+layer.getRadius()+" nr for "+layer.feature.properties.depth+"  "+nR);
-                  return layer.setRadius( parseInt(nR) );
-                }
-            });
-        
+        let myOlDiv = lfMakeKmPanel( this.mioApp.$data.map, this.homeUrl, 'osdDivTest' );
+        $.get( `${this.homeUrl}assets/osdMapTest1.svg`, function( data, status ){
+          siteByKey.s_multiSVGPage.o.mulSvgParseGet( data  , status, false, '.osdDivTest' );
         });
-        // load geojson end 
-      }   
+      }
+
+      
+
       
 
       // bind move 
+      var syncMapTopToBottom = () => {
+        console.log('moveend2 ... sync ');
+        this.ll['last'] = this.mioApp.$data.map.getCenter();
+        this.ll['zoom'] = this.mioApp.$data.map.getZoom();
+
+        this.mioApp1.$data.map.setView( this.ll['last'], this.ll['zoom'] );
+        console.log('moveend2 ... sync .. DONE');
+        
+      };
       if( 1 ){
         this.mioApp.$data.map.on( 'moveend', (e='')=>{
           //console.log('connect moveend ....');
-          console.log('moveend2');
-          this.ll['last'] = this.mioApp.$data.map.getCenter();
-          this.ll['zoom'] = this.mioApp.$data.map.getZoom();
-
-          this.mioApp1.$data.map.setView( this.ll['last'], this.ll['zoom'] );
          // this.mPanel._instance.ctx.onMoveDoneEvent( {'lfmap':this.map} );
+          syncMapTopToBottom();
         });
+
+        setTimeout(()=>{ syncMapTopToBottom(); },800);
       }
 
     //},500);
