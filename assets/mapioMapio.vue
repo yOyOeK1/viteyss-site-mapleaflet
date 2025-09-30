@@ -265,9 +265,11 @@ export default{
                     }
 
                     this.confT1.splice(1,0,{ 
+                        icon: this.homeUrl+"./geoJsonLibs/dbSoundings_ico_124_124.png",
                         name: 'dbSoundings',
                         fields: [
-                            { name: "db sources",          filesList: true, value:this.depthSoundings, desc: "Paths to files *.sqlit3 with depth sounding logs. Separate paths with [,] comma."   },
+                            //{ name: "db sources",          filesList: true, value:this.depthSoundings, desc: "Paths to files *.sqlit3 with depth sounding logs. Separate paths with [,] comma."   },
+                            { name: "db sources",          desc:this.depthSoundings+" Paths to files *.sqlit3 with depth sounding logs. Separate paths with [,] comma."   },
                             { name: "raster size",          range: true, min:4, max:50, step:1, value:this.depthSouningO.gridCellSize, callBackF:onSettingsChangeDBSoundigRaster },
                             { name: "min depth (meters)",     range: true, min:0.1, max:10, step:0.1, value:2.6, callBackF:onSettingsChangeDBSoundigMinDepth }
                         ]
