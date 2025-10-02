@@ -1,3 +1,5 @@
+import { getColorToDepth, getColor } from "./getColorToDepth.js";
+
 
 
 let cellSize = 50;
@@ -18,7 +20,7 @@ function resizeLayers( map, geoLayer ){
             
             return layer.setRadius(50);
         }else{
-            let d = layer.feature.properties.depth/1.00;
+            let d = layer.feature.depth/1.00;
             let nR = mMapVal( d, 0, viewDist, 0, viewH );
             if( d < 4.9 ){ // draft to red 
                 nR = 10.0;
@@ -47,6 +49,12 @@ class getLgeoJSON{
         this.dataG = [];
         this.cellSize = cellSize;
         this.minDepth = minDepth;
+        this.minColor = '#ff0000';
+        this.colorM = [
+            [0,         '#ffea6f'],
+            [2.2,       '#73bcc7'],
+            [10.0 ,     '#eef9fa']
+        ];        
     }
     
     makeJso=( dataG )=>{
@@ -57,14 +65,27 @@ class getLgeoJSON{
         });
     }
     style = (feature) => {
-        return feature.properties && feature.properties.style;
+        let colorsA = getColorToDepth( feature.depth );
+
+        colorsA['rgb'] = getColor( feature.depth, this.colorM );
+
+
+        if( feature.depth <= this.minDepth )
+            colorsA['rgb'] = this.minColor;
+
+
+        return {
+            fillOpacity: colorsA['alpha'],
+            fillColor: colorsA['rgb'],
+        };
+        //return feature.properties && feature.properties.style;
     }
     
     onEachFeature = (feature, layer) => {
         //console.log('getLgeoJSON / eachFuture '+feature);
         let popupContent = '';
-        let pro = feature.properties;
-        if (feature.properties && feature.id) {
+        let pro = feature;
+        if (feature && feature.id) {
             popupContent = `Depth: ${pro.depth} meters.<br>Id: ${feature.id}`;
         }
         
@@ -96,7 +117,8 @@ class getLgeoJSON{
             width:0//,
             //fillOpacity: feature.properties.style.fillOpacity,
         };
-        if( feature.properties.depth <= this.minDepth ){
+        if( feature.depth <= this.minDepth ){
+            console.log('min depth set 3 point ');
             tOpts['fillColor'] = 'red';
         }
 

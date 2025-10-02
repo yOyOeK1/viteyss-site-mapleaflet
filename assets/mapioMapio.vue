@@ -14,6 +14,7 @@ import mioHashHelper from './mioHashHelper';
 import { lfMakeOSD, lfOSDpushToOSD } from '../lfMakeOSD';
 import { depthSoundinOverLay } from '../geoJsonLibs/depthSoundingHelp';
 import CSettings from '../compSettings/cSettings.vue';
+import DepthColorPicker from '../geoJsonLibs/depthColorPicker.vue';
 //import { dbSoundingsToData } from '../geoJsonLibs/fromdb';
 
 
@@ -230,6 +231,8 @@ export default{
                     this.map.setZoom(value);
                 };
 
+                let divColorPickerName = "colorPicker"+this.mapname;
+
                 this.confT1 = ref([
                     { 
                         name: 'Map at',
@@ -238,6 +241,13 @@ export default{
                             { name: "lng",      text: this.getLastLng },
                             { name: "Zoom",     range: true, min:1, max:22, step:1, value:zoomSetIs, callBackF:onSettingsChange }
                         ]
+                     },
+                     { 
+                        name: 'Color picker',
+                        fields: [
+                            { name: "depth color legend", whantDiv: divColorPickerName }
+                        ]
+                       
                      },
                      { 
                         name: 'Mapio - settings',
@@ -265,11 +275,11 @@ export default{
                     }
 
                     this.confT1.splice(1,0,{ 
-                        icon: this.homeUrl+"./geoJsonLibs/dbSoundings_ico_124_124.png",
+                        //icon: this.homeUrl+"./geoJsonLibs/dbSoundings_ico_124_124.png",
                         name: 'dbSoundings',
                         fields: [
-                            //{ name: "db sources",          filesList: true, value:this.depthSoundings, desc: "Paths to files *.sqlit3 with depth sounding logs. Separate paths with [,] comma."   },
-                            { name: "db sources",          desc:this.depthSoundings+" Paths to files *.sqlit3 with depth sounding logs. Separate paths with [,] comma."   },
+                            ////{ name: "db sources",          filesList: true, value:this.depthSoundings, desc: "Paths to files *.sqlit3 with depth sounding logs. Separate paths with [,] comma."   },
+                            //{ name: "db sources",          desc:this.depthSoundings+" Paths to files *.sqlit3 with depth sounding logs. Separate paths with [,] comma."   },
                             { name: "raster size",          range: true, min:4, max:50, step:1, value:this.depthSouningO.gridCellSize, callBackF:onSettingsChangeDBSoundigRaster },
                             { name: "min depth (meters)",     range: true, min:0.1, max:10, step:0.1, value:2.6, callBackF:onSettingsChangeDBSoundigMinDepth }
                         ]
@@ -280,6 +290,30 @@ export default{
                 //window['confT1_'+this.mapname] = this.confT1;
                 setOpts.methods.openPanelWithConfig( this.confT1 );
                 this.settingsOn = true;
+
+
+
+
+
+
+                // start div depth color picker 
+
+                let divEl = $("#"+divColorPickerName);
+                //depthSouningO: this.depthSouningO,
+                //geoH: this.depthSouningO.geoH
+                let deCoPiAp = createApp( DepthColorPicker, {
+                    mapio:this
+                });
+                setTimeout(()=>{
+                    deCoPiAp.mount("#"+divColorPickerName);
+                    console.log('color picker mounted ....');
+                },100);
+
+
+
+                // start div depth color picker  end 
+
+
             });
 
         }

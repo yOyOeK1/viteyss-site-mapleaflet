@@ -23,7 +23,13 @@ class depthSoundinOverLay{
 
     setGridCellSize=( newSize )=>{
         this.gridCellSize = newSize;
+        let minDepth = this.geoH.minDepth;
+        let minColor = this.geoH.minColor;
+        let colorM = this.geoH.colorM;
         this.geoH = new geoHelper.getLgeoJSONC( this.map,  this.gridCellSize );
+        this.geoH.minDepth = minDepth;
+        this.geoH.minColor = minColor;
+        this.geoH.colorM = colorM;
         this.reinstallLgeo();        
     }
 

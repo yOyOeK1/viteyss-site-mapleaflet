@@ -1,5 +1,6 @@
 import sqlite3 from 'sqlite3';
 import fs from 'fs'
+import { getColorToDepth } from './getColorToDepth.js';
 
 /*
 node ./fromdb.js
@@ -31,44 +32,6 @@ var db = new SQLite3.Database(configg['dbPath'], (err) => {
   }
 });
 
-function getColorToDepth( depth, onlyAlpha = false ){
-    let dep,r,g,b,a=1.0;
-    if( depth<10.0 && depth>2.2 ){
-        dep = ((depth-2.2)/7.8);
-        r = dep;
-        g = 0.5+(dep*0.5);
-        b = 0.75+(dep*0.25);
-        //a= 105;
-        
-    }else if( depth <=2.2 ){
-        dep = ((depth-2.2)/8.8)*0.9;
-        r = 0.75;
-        g = 0.75;
-        b = 0.99;
-        a=1.0;
-
-    }else if( depth>=10.0 ){
-        r = 1;
-        g = 1;
-        b = 1;
-        
-    }
-
-    if( depth >= 5.0 ){
-        a = 5.0/parseFloat( depth );
-        //console.log(`depth: ${depth} a:${a}`)
-    }
-    if( a < 0.0  )
-        a = 0.0;
-    else if( a > 1.0 )
-        a= 1.0;
-
-    return {
-        alpha: parseFloat(a).toFixed(2),
-        rgba: `rgb(${parseInt(r*255.00)},${parseInt(g*255.00)},${parseInt(b*255.00)})`
-    };
-}
-
 
 function rowsToGeo( rows ){
     let tr = [];
@@ -83,9 +46,11 @@ function rowsToGeo( rows ){
                 ],
                 radius: parseInt(r['depth']),
             },
+            "id": r['id'],
+            "xy": [ r['x_cell_id'], r['y_cell_id'] ],
             "type": "Feature",
-            "properties": {
-                "depth": r['depth'].toFixed(1),
+            "depth": r['depth'].toFixed(1)
+            /*"properties": {
                 "style": {
                     //weight: 0,
                     //color: "green",
@@ -94,9 +59,7 @@ function rowsToGeo( rows ){
                     fillColor: colorsA['rbg'],
                     //color: colorsA['rbg'],
                 }
-            },
-            "id": r['id'],
-            "xy": [ r['x_cell_id'], r['y_cell_id'] ]
+            },*/
         });
     }
 
@@ -217,4 +180,4 @@ let dbSoundingsToData = {
     getDb: db,
     selectByRaster: select2
 };
-export { dbSoundingsToData }
+export { dbSoundingsToData, getColorToDepth }
