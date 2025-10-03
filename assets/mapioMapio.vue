@@ -15,6 +15,7 @@ import { lfMakeOSD, lfOSDpushToOSD } from '../lfMakeOSD';
 import { depthSoundinOverLay } from '../geoJsonLibs/depthSoundingHelp';
 import CSettings from '../compSettings/cSettings.vue';
 import DepthColorPicker from '../geoJsonLibs/depthColorPicker.vue';
+import DepthColorsPreesets from '../geoJsonLibs/depthColorsPreesets.vue';
 //import { dbSoundingsToData } from '../geoJsonLibs/fromdb';
 
 
@@ -245,6 +246,7 @@ export default{
                      { 
                         name: 'Color picker',
                         fields: [
+                            { name: "depth color presets", whantDiv: 'presets'+divColorPickerName },
                             { name: "depth color legend", whantDiv: divColorPickerName }
                         ]
                        
@@ -304,9 +306,26 @@ export default{
                 let deCoPiAp = createApp( DepthColorPicker, {
                     mapio:this
                 });
+
+                let deCoPrAp = createApp( DepthColorsPreesets,{
+                    presets: [
+                        { id:0, name: 'yell-blue-whi', colorM: [ 
+                            [0,  '#ffea6f'], [2.2,    '#73bcc7'], [10.0,    '#eef9fa'] ],
+                            },
+                        { id:1, name: 'red-2', colorM: [ 
+                            [0,  '#ff0000'], [2.5,    '#ff2200'], [5.0,    '#dddd00'], [10.0,    '#eef9fa'] ],
+                            }
+                    ],
+                    selected: 0,
+                    mapio: this
+                });
+
                 setTimeout(()=>{
-                    deCoPiAp.mount("#"+divColorPickerName);
+                
+                    deCoPiAp.mount( "#"+divColorPickerName );
+                    deCoPrAp.mount( "#presets"+divColorPickerName );
                     console.log('color picker mounted ....');
+                
                 },100);
 
 

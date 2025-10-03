@@ -2,11 +2,13 @@
 
 Web map supportted by `leafletjs`. 
 
+
 ### screenshot
 
 ![](./examples/screen_25090610.png)
 
 First draft `25090610`
+
 
 ### what can do
 
@@ -31,16 +33,19 @@ First draft `25090610`
   - [x] menure distance
 - depth sounding overlays
 
+
 ### dependency
 
 - **imgkap** [link ...](https://github.com/nohal/imgkap)
   In core when it handle kap files it use ***imgkap** software to split kap to mheader and png. Look file `kapHelp.js` and `pathToKmgKapSplit` change it to your path.
+
 
 ### used libraries
 
 Libraries are comming prefetchd. So are comming with viteyss-site-mapleatlet. Cas be found in `./assets` directory.
 
 [leaflet.fullscreen](https://github.com/brunob/leaflet.fullscreen) | [leaflet.filelayer.js](https://github.com/makinacorpus/Leaflet.FileLayer) | [togeojson.js](https://github.com/mapbox/togeojson) | [leaflet.js](https://leafletjs.com) | [vue.js](https://vuejs.org/) | [leaflet.TileLayer.Fallback](https://github.com/ghybs/Leaflet.TileLayer.Fallback/tree/master) | [leaflet.contextmenu](https://aratcliffe.github.io/Leaflet.contextmenu/examples/index.html) | [leaflet.latlng-graticule.js](https://github.com/Leaflet/Leaflet.Graticule?tab=readme-ov-file)
+
 
 ### charts - local file system
 
@@ -54,32 +59,37 @@ Can do: *.kap, *.kml, *.svg
 **Borders** to show posible chart
 **shows / hides** automaticaly chart base on `%` of area it takes on screen
 
+
 #### charts - using SASPlanet
 
 There is a `setting` for tile provider of local proxy. So using sasplanet you cat force it to cashe areas using it.
 Settings files can be found in project directory:
 `./examples/SASPlanet_settings/Aing_Sat.zmp`
 
+
 ### tracks local file system
 
 * can load file from client as overlay.
 * TODO look for local files and present them with manager
 
+
 ### dbSoundings - depthLoger overlay
 
-[ working need more work ] **depthSoundings** custam geoJSON overlay showing customizable depths readings from `sonar` akt depth sounder from a `leisure water craft`
+[ working need more work ] **depthSoundings** custam geoJSON overlay showing depths readings from `sonar` akt `depth sounder` from a `leisure water craft`
 
-![](./examples/screen_depthSoundings_dbSoundings_2509281313.png)
+![](./examples/screen_depthSoundings_dbSoundings_custom_color_presets_25100307.png)
     
-I did some readings and `../LogDepth.db` is sqlite3 powerd data base. Link to project [depthLoger](https://github.com/yOyOeK1/depthLoger) and my [depthLogerDB](https://github.com/yOyOeK1/depthLogerDB)
-    Do you have any reading to share ? 
-    Or you have a depth sounder in your bilge / locker and you want to send it to me?
-    
-It can be set:
-- custom alert depth where readings are show red (don't go area)
-- size / accuracity of grid ( all need to be simplifaid )
-- TB
-    
+I did some readings and I use a public data base file `../LogDepth.db` powerd by sqlit3. Link to project [depthLoger](https://github.com/yOyOeK1/depthLoger) and my [depthLogerDB](https://github.com/yOyOeK1/depthLogerDB)
+
+- [x] custom minimum depth alarm set with custome color
+- [x] presets for colors specturm / depths
+- [x] add / edit / remove presets, points with key color
+- [x] size / accuracity of grid ( all need to be simplifaid )
+
+- Do you have any reading to share ? 
+- Or you have a depth sounder in your bilge / locker and you want to send it to me?
+
+
 
 ### about proxy for tiles
 
