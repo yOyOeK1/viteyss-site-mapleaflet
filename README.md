@@ -109,6 +109,7 @@ this.mioApp = createApp( MapioMapio,
             'zoomControl': false,
             'center': [9.2620320938,-79.9355079], 'zoom':12
         },
+        'useSettingToResume':true, 
         'addSmallLatLon': true, 
         'addFullScreenBt': true,
         'addFallbackTiles': false, 

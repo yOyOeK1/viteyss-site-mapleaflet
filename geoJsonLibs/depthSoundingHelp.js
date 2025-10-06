@@ -9,11 +9,24 @@ class depthSoundinOverLay{
         this.map = map;
         this.lastData = [];
         this.control = control;
-        this.gridCellSize = 10;
+        this.gridCellSize = localStorageH.getK( 'depthSounding/'+this.map.mapname+'/gridCellSize', 10);//10;
         this.dbSoundingsRun = 1;
         let mapB = this.map.getBounds();
         this.geoHelper = geoHelper;
-        this.geoH = new geoHelper.getLgeoJSONC( this.map,  this.gridCellSize )
+
+        // resume color palet scale on load colorM
+        let depthColPresConf_from_locStoH = localStorageH.getK(this.map.settKey+'depthColPresets', '' );
+        let colorM = undefined;
+        if( depthColPresConf_from_locStoH != '' ){
+            console.log('depth color presets from '+this.map.settKey+'  xxlocStoH3 using from settings ....');
+            let j = JSON.parse( depthColPresConf_from_locStoH );
+            colorM = j['presets'][ j['selected'] ]['colorM'];
+            console.log('depth color presets from '+this.map.settKey+'  xxlocStoH3 colorM ....',colorM);
+        }
+
+        let minDepth = parseFloat(localStorageH.getK( 'geoHelper/'+this.map.mapname+'/minDepth', 2.59 ));
+        this.geoH = new geoHelper.getLgeoJSONC( this.map,  this.gridCellSize, minDepth, colorM )
+        this.geoH.minColor = localStorageH.getK( 'geoHelper/'+this.map.mapname+'/minColor', '#ff0000' );
         this.overLayName = 'dbSoundings';
         this.LgeoJsonDbDepths = -1;
         this.updateDelay = -1;
@@ -26,10 +39,8 @@ class depthSoundinOverLay{
         let minDepth = this.geoH.minDepth;
         let minColor = this.geoH.minColor;
         let colorM = this.geoH.colorM;
-        this.geoH = new geoHelper.getLgeoJSONC( this.map,  this.gridCellSize );
-        this.geoH.minDepth = minDepth;
+        this.geoH = new geoHelper.getLgeoJSONC( this.map,  this.gridCellSize, minDepth, colorM );
         this.geoH.minColor = minColor;
-        this.geoH.colorM = colorM;
         this.reinstallLgeo();        
     }
 

@@ -120,8 +120,9 @@ class s_vysmapleafletPage{
                 9.562813071565845,-78.86047482490541
                 //39.7471494,-104.9998241
                 ], 
-              'zoom':16,
+              'zoom':16
             },
+            'useSettingToResume':true,
             //'fileLoad': false, 
             'homeUrl': this.homeUrl, 
             'addSmallLatLon': true, 

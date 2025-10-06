@@ -43,6 +43,7 @@ export default{
             );
             this.mapio.depthSouningO.geoH.colorM = this.presets[ this.preselected ].colorM;
             this.mapio.depthSouningO.depthSoundingUpdate();
+            //this.selected = this.preselected;
         }
     }
 

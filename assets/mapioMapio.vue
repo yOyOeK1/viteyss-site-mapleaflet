@@ -34,7 +34,8 @@ export default{
         'addGrid': { default: false},
         'useHash': { type:Boolean, default: true }, // put and restore hash url
         'addOSD': { default: false },
-        'depthSoundings': { default: "" }
+        'depthSoundings': { default: "" },
+        'useSettingToResume': { default: false }
     },
     data(){
         let map = ref();
@@ -50,10 +51,12 @@ export default{
 
         return { map, control, fsControl, conFileLoad, tilesFallback, olGrid, olSmallLL, olOSD,
             LgeoJsonDbDepths, depthSouningO,//dbSoundingsRun
+            depthColPresConf: {}, depthColPicApp:ref(Object()), deCoPiAp:ref(Object()),
             cSettings: ref(Object()),
             settingsOn: false,
             confT1: ref(Object()),
             mapll: ref({lat:0.0, lng:0.0}),
+            settKey: `mapio/${this.mapname}/`
          };
     },
     methods:{
@@ -81,6 +84,14 @@ export default{
     mounted(){
         console.log('mounted:'+this.mapname);
 
+        if( this.useSettingToResume == true ){
+            this.mapOpts['zoom'] = localStorageH.getK(this.settKey+'zoom', this.mapOpts['zoom']);
+            this.mapOpts['center'] = [
+                localStorageH.getK(this.settKey+'lat', this.mapOpts['center'][0]),
+                localStorageH.getK(this.settKey+'lng', this.mapOpts['center'][1])
+            ];
+        }
+
         
         console.log('log concat mapOptions');
 
@@ -93,6 +104,8 @@ export default{
         console.log('mapio ['+this.mapname+'] opts: '+JSON.stringify(this.mapOpts,null,2));
 
         this.map = L.map( this.mapname, this.mapOpts);
+        this.map['settKey'] = this.settKey;
+        this.map['mapname'] = this.mapname;
         
 
         // for settings update ui if open settings
@@ -234,6 +247,8 @@ export default{
 
                 let divColorPickerName = "colorPicker"+this.mapname;
 
+                
+
                 this.confT1 = ref([
                     { 
                         name: 'Map at',
@@ -253,7 +268,8 @@ export default{
                      },
                      { 
                         name: 'Mapio - settings',
-                        desc: "Setting of map ("+this.mapname+")",
+                        html: "Setting of map ("+this.mapname+")"+
+                            `<button id="btSaveMapioSet${this.mapname}">Save settings</button>`,
                        
                      },
                      { 
@@ -283,17 +299,60 @@ export default{
                             ////{ name: "db sources",          filesList: true, value:this.depthSoundings, desc: "Paths to files *.sqlit3 with depth sounding logs. Separate paths with [,] comma."   },
                             //{ name: "db sources",          desc:this.depthSoundings+" Paths to files *.sqlit3 with depth sounding logs. Separate paths with [,] comma."   },
                             { name: "raster size",          range: true, min:4, max:50, step:1, value:this.depthSouningO.gridCellSize, callBackF:onSettingsChangeDBSoundigRaster },
-                            { name: "min depth (meters)",     range: true, min:0.1, max:10, step:0.1, value:2.6, callBackF:onSettingsChangeDBSoundigMinDepth }
+                            { name: "min depth (meters)",     range: true, min:0.1, max:10, step:0.1, value:this.depthSouningO.geoH.minDepth, callBackF:onSettingsChangeDBSoundigMinDepth }
                         ]
                      });
 
                 }
-
+                
                 //window['confT1_'+this.mapname] = this.confT1;
                 setOpts.methods.openPanelWithConfig( this.confT1 );
                 this.settingsOn = true;
 
 
+                // add listiner for on save settings 
+                setTimeout(()=>{
+                    $(`#btSaveMapioSet${this.mapname}`).click(()=>{
+                        console.log('save settings! '+this.mapname);
+
+                        console.log(`- lat: [${this.confT1[0]['fields'][0]['text']}]`)
+                        localStorageH.setK(this.settKey+'lat', this.confT1[0]['fields'][0]['text']);
+
+                        console.log(`- lng: [${this.confT1[0]['fields'][1]['text']}]`)
+                        localStorageH.setK(this.settKey+'lng', this.confT1[0]['fields'][1]['text']);
+
+                        console.log(`- zoom: [${this.confT1[0]['fields'][2]['value']}]`)
+                        localStorageH.setK(this.settKey+'zoom', this.confT1[0]['fields'][2]['value']);
+
+                        console.log(`- min depth: `+this.depthSouningO.geoH.minDepth);
+                        localStorageH.setK( 'geoHelper/'+this.mapname+'/minDepth', this.depthSouningO.geoH.minDepth );
+
+                        console.log(`- min depth color: `+this.depthSouningO.geoH.minColor);
+                        localStorageH.setK( 'geoHelper/'+this.mapname+'/minColor', this.depthSouningO.geoH.minColor );
+                        
+                        console.log(`- gridCellSize: `+this.depthSouningO.gridCellSize);
+                        localStorageH.setK( 'depthSounding/'+this.mapname+'/gridCellSize', this.depthSouningO.gridCellSize );
+
+                        console.log(`- presets: `,this.depthColPresConf);       
+                        let tr = {
+                            presets: this.depthColPresConf.presets,
+                            selected: this.depthColPicApp._instance.ctx.$data.preselected,
+                        };                        
+                        console.log(`- presets: as json`,JSON.stringify(tr,null,4));
+
+                        localStorageH.setK(this.settKey+'depthColPresets', JSON.stringify(tr) );
+                        for(let preset of this.depthColPresConf.presets){
+                            localStorageH.setK('depthColPreset/'+preset.name, JSON.stringify(preset) );
+                        }
+
+                        $.toast({
+                            heading: 'Saved',
+                            text: 'To local settings.',
+                            icon: 'success'
+                        });
+
+                    });
+                },500);
 
 
 
@@ -303,11 +362,12 @@ export default{
                 let divEl = $("#"+divColorPickerName);
                 //depthSouningO: this.depthSouningO,
                 //geoH: this.depthSouningO.geoH
-                let deCoPiAp = createApp( DepthColorPicker, {
+                this.deCoPiAp = createApp( DepthColorPicker, {
                     mapio:this
                 });
 
-                let deCoPrAp = createApp( DepthColorsPreesets,{
+                //let depthColPresConf = JSON.parse(localStorageH.getK(this.settKey+'depthColPresets', JSON.stringify(
+                this.depthColPresConf = {
                     presets: [
                         { id:0, name: 'yell-blue-whi', colorM: [ 
                             [0,  '#ffea6f'], [2.2,    '#73bcc7'], [10.0,    '#eef9fa'] ],
@@ -318,19 +378,38 @@ export default{
                     ],
                     selected: 0,
                     mapio: this
-                });
+                };
+                console.log('depth color presets from locStoH1');
+                let depthColPresConf_from_locStoH = localStorageH.getK(this.settKey+'depthColPresets', '' );
+                console.log('depth color presets from locStoH2: ',depthColPresConf_from_locStoH);
+                
+                if( depthColPresConf_from_locStoH != '' ){
+                    console.log('depth color presets from locStoH3 using from settings ....');
+                    let j = JSON.parse( depthColPresConf_from_locStoH );
+                    this.depthColPresConf['selected'] = j['selected'];
+                    this.depthColPresConf['presets'] = j['presets'];
+                    
+                }
+                //)));
+                this.depthColPicApp = createApp( DepthColorsPreesets, this.depthColPresConf );
 
                 setTimeout(()=>{
                 
-                    deCoPiAp.mount( "#"+divColorPickerName );
-                    deCoPrAp.mount( "#presets"+divColorPickerName );
+                    this.deCoPiAp.mount( "#"+divColorPickerName );
+                    this.depthColPicApp.mount( "#presets"+divColorPickerName );
                     console.log('color picker mounted ....');
+                    // to update if change by resume
+                    this.depthColPicApp._instance.ctx.onChange();
                 
                 },100);
 
 
 
                 // start div depth color picker  end 
+
+
+
+
 
 
             });

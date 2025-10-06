@@ -44,13 +44,13 @@ function setOn_fixOnZoom( map, geoLayer ){
 
 
 class getLgeoJSON{
-    constructor( map,  cellSize = 50, minDepth = 2.6  ){
+    constructor( map,  cellSize = 50, minDepth = undefined, colorM = undefined  ){
         this.map = map;
         this.dataG = [];
         this.cellSize = cellSize;
-        this.minDepth = minDepth;
+        this.minDepth = minDepth != undefined ? minDepth : 2.6;//parseFloat(localStorageH.getK( 'geoHelper'+this.map.mapname+'//minDepth', 2.6));
         this.minColor = '#ff0000';
-        this.colorM = [
+        this.colorM = colorM != undefined ? colorM :[
             [0,         '#ffea6f'],
             [2.2,       '#73bcc7'],
             [10.0 ,     '#eef9fa']

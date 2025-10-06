@@ -1,6 +1,6 @@
 <template>
 <div class="depColPic">
-
+a
 
     <table 
         class="depColPicTab">
