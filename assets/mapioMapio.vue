@@ -51,7 +51,7 @@ export default{
 
         return { map, control, fsControl, conFileLoad, tilesFallback, olGrid, olSmallLL, olOSD,
             LgeoJsonDbDepths, depthSouningO,//dbSoundingsRun
-            depthColPresConf: {}, depthColPicApp:ref(Object()), deCoPiAp:ref(Object()),
+            depthColPresConf: {}, depthColPicApp:-1, deCoPiAp:-1,
             cSettings: ref(Object()),
             settingsOn: false,
             confT1: ref(Object()),
@@ -336,7 +336,7 @@ export default{
                         console.log(`- presets: `,this.depthColPresConf);       
                         let tr = {
                             presets: this.depthColPresConf.presets,
-                            selected: this.depthColPicApp._instance.ctx.$data.preselected,
+                            selected: this.depthColPicApp._instance.ctx.$data.preselected_id,
                         };                        
                         console.log(`- presets: as json`,JSON.stringify(tr,null,4));
 
@@ -362,9 +362,10 @@ export default{
                 let divEl = $("#"+divColorPickerName);
                 //depthSouningO: this.depthSouningO,
                 //geoH: this.depthSouningO.geoH
-                this.deCoPiAp = createApp( DepthColorPicker, {
-                    mapio:this
-                });
+                if( this.deCoPiAp === -1 )
+                    this.deCoPiAp = createApp( DepthColorPicker, {
+                        mapio:this
+                    });
 
                 //let depthColPresConf = JSON.parse(localStorageH.getK(this.settKey+'depthColPresets', JSON.stringify(
                 this.depthColPresConf = {
@@ -390,16 +391,48 @@ export default{
                     this.depthColPresConf['presets'] = j['presets'];
                     
                 }
+                for( let lsI of localStorageH.getStats()['keys'] ){
+                    if( lsI.startsWith('depthColPreset/') ){
+                        let lsV = JSON.parse(localStorageH.getK( lsI ));
+                        
+                        let lookForRes = this.depthSouningO.getPresetById( this.depthColPresConf['presets'], lsV.id );
+                        if( lookForRes == undefined ){
+                            console.log('preset in localstorage: '+lsI,'\n\nvOff',lsV,'\n\nlookFor',lookForRes);
+                            console.log('not in local stack add ....');
+                            this.depthColPresConf['presets'].push( lsV );
+                        }
+
+                    }
+                }
                 //)));
-                this.depthColPicApp = createApp( DepthColorsPreesets, this.depthColPresConf );
+                if( this.depthColPicApp === -1 )
+                    this.depthColPicApp = createApp( DepthColorsPreesets, this.depthColPresConf );
 
                 setTimeout(()=>{
+                    if(0){
+                        console.log('color picker and preset second run .....', this.deCoPiAp,'\n\n',this.depthColPicApp);
+                        try{
+                            if( this.deCoPiAp['_instance']['isMounted'] ){
+
+                                console.log('pre mount',this.deCoPiAp['_instance']);
+                                this.deCoPiAp.unmount();
+                                console.log('post mount',this.deCoPiAp['_instance']);
+                                this.depthColPicApp.unmount();
+                                console.log('unmount and clean ok');
+                            }
+
+                        }catch(e){
+                            console.error('unmount and clean error \n',e);
+                        }
+                    }
                 
-                    this.deCoPiAp.mount( "#"+divColorPickerName );
-                    this.depthColPicApp.mount( "#presets"+divColorPickerName );
-                    console.log('color picker mounted ....');
-                    // to update if change by resume
-                    this.depthColPicApp._instance.ctx.onChange();
+                    setTimeout(()=>{
+                        this.deCoPiAp.mount( "#"+divColorPickerName );
+                        this.depthColPicApp.mount( "#presets"+divColorPickerName );
+                        console.log('color picker mounted ....');
+                        // to update if change by resume
+                        //this.depthColPicApp._instance.ctx.onChange();
+                    },1000);
                 
                 },100);
 

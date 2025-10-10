@@ -20,7 +20,7 @@ class depthSoundinOverLay{
         if( depthColPresConf_from_locStoH != '' ){
             console.log('depth color presets from '+this.map.settKey+'  xxlocStoH3 using from settings ....');
             let j = JSON.parse( depthColPresConf_from_locStoH );
-            colorM = j['presets'][ j['selected'] ]['colorM'];
+            colorM = this.getPresetById(j['presets'], j['selected'] )['colorM'];
             console.log('depth color presets from '+this.map.settKey+'  xxlocStoH3 colorM ....',colorM);
         }
 
@@ -32,6 +32,14 @@ class depthSoundinOverLay{
         this.updateDelay = -1;
         this.setEvents();
         this.depthSoundingUpdate();
+    }
+
+    getPresetById( presets, id ){
+        //console.log('get preset by id:'+id,'\nin\n',presets);
+        for( let pre of presets )
+            if( pre.id === id )
+                return pre;
+        return undefined;
     }
 
     setGridCellSize=( newSize )=>{

@@ -107,6 +107,7 @@ class serverMapLeaflet{
                         res.end('error');
                     }else{
                         this.cl('[cacheed]');
+                        console.log('data',data, saveIt);
                         res.end(data);
                     }
 
