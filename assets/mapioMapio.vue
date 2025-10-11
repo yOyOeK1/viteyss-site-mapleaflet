@@ -4,7 +4,7 @@
 </template>
 <script>
 import { ref, createApp } from 'vue';
-import { lfBaseMaps , lfBaseBapsAttribution } from '../lfBaseMaps';
+import { lfBaseMaps , lfBaseBapsAttribution, lfBaseBapsKeys } from '../lfBaseMaps';
 import { lfMakeKmPanel } from '../lfMakeKmPanel';
 import { lcFileGpxLoad } from '../lcFileGpx';
 import MapioMapsPanel from './mapioMapsPanel.vue';
@@ -56,7 +56,8 @@ export default{
             settingsOn: false,
             confT1: ref(Object()),
             mapll: ref({lat:0.0, lng:0.0}),
-            settKey: `mapio/${this.mapname}/`
+            settKey: `mapio/${this.mapname}/`,
+            lfbm:ref(Object()),currBaseMapO: ref(Object()), lfbmKeySel: '' // for base map and settings
          };
     },
     methods:{
@@ -149,17 +150,46 @@ export default{
 
 
 
+
+        // base map 
+
+
         if( this.addlfBaseMaps ){
-            this.control = L.control.layers( lfBaseMaps( this.map ), 
-                //lfOverLayMaps( this.lfmap, this.homeUrl )
-            ).addTo( this.map );
+            if( 0 ){
+                this.control = L.control.layers( lfBaseMaps( this.map ), 
+                    //lfOverLayMaps( this.lfmap, this.homeUrl )
+                ).addTo( this.map );
+            } else if( 1 ){
+                this.control = L.control.layers( {} ).addTo( this.map );
+                this.lfbm = lfBaseMaps( this.map );
+                this.lfbmKeySel = localStorageH.getK('mapio/'+this.mapname+'/basemap/keySel', 'OpenStreetMap,CyclOSM' );
+                this.currBaseMapO = this.lfbm[ this.lfbmKeySel ];
+                this.control.addOverlay( this.currBaseMapO, this.lfbmKeySel );
+                this.currBaseMapO.addTo( this.map );
+            }
         }else{
             this.control = L.control.layers( {}, 
                 //lfOverLayMaps( this.lfmap, this.homeUrl )
             ).addTo( this.map );
         }
 
-        
+            // base map settings 
+        let onBaseMapSettingChange = ( ev='', value='')=>{
+            console.log('base map setting change !',value);
+
+            this.control.removeLayer( this.currBaseMapO );
+            this.currBaseMapO.remove( this.map );
+
+            this.lfbmKeySel = value;
+            console.log('   new map is :'+this.lfbmKeySel);
+            this.currBaseMapO = this.lfbm[ this.lfbmKeySel ];
+            this.control.addOverlay( this.currBaseMapO, this.lfbmKeySel );
+            this.currBaseMapO.addTo( this.map );
+
+        };
+
+
+        // base map end 
         
         if( this.addFullScreenBt ){
             this.fsControl = L.control.fullscreen();
@@ -194,10 +224,12 @@ export default{
             this.map.on('overlayadd',(e='')=>{
                 console.log('overlayadded ....');
                 this.mPanel._instance.ctx.currentFolderOverlayChange(e);
+                console.log('overlayadded ....DONE');
             });
             this.map.on('overlayremove',(e='')=>{
                 console.log('overlayremove ....');
                 this.mPanel._instance.ctx.currentFolderOverlayChange(e);
+                console.log('overlayremove ....DONE');
             });
             //this.mPanel._instance.ctx.onMoveDoneEvent( {'lfmap':this.map} );
         }
@@ -280,6 +312,17 @@ export default{
                 ]);
 
 
+                if( this.addlfBaseMaps ){
+                    this.confT1.splice(1,0,{ 
+                        name: 'Base maps',
+                        fields: [
+                            { name: "set base map",      selectoneoption: true, value: this.lfbmKeySel, values: Object.keys(this.lfbm),
+                                    callBackF:onBaseMapSettingChange
+                             }
+                        ]
+                     });
+                }
+                
                 if( this.depthSoundings != "" ){
 
                     let onSettingsChangeDBSoundigRaster = (ev='', value='')=>{
@@ -314,6 +357,9 @@ export default{
                 setTimeout(()=>{
                     $(`#btSaveMapioSet${this.mapname}`).click(()=>{
                         console.log('save settings! '+this.mapname);
+
+                        console.log(`- base map: [${this.lfbmKeySel}]`)
+                        localStorageH.setK('mapio/'+this.mapname+'/basemap/keySel', this.lfbmKeySel );
 
                         console.log(`- lat: [${this.confT1[0]['fields'][0]['text']}]`)
                         localStorageH.setK(this.settKey+'lat', this.confT1[0]['fields'][0]['text']);

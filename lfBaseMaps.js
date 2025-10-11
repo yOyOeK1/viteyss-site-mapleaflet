@@ -1,6 +1,7 @@
 import onlineMaps from "./onlineMaps"
 
 let lfBaseBapsAttribution = [];
+let lfBaseBapsKeys = [];
 
 let lfBaseMaps = function(map){
 
@@ -16,7 +17,7 @@ let lfBaseMaps = function(map){
       
     var lftileLayer_cyclOSM = L.tileLayer(onlineMaps['osmCyclosm']['proxy'], {
         maxZoom: 19,
-    }).addTo( map );
+    });//.addTo( map );
     lfBaseBapsAttribution.push('© OpenStreetMap contributors. Tiles style by CyclOSM hosted by OpenStreetMap France. Website and API terms');
       
     var osmHOT = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
@@ -45,9 +46,11 @@ let lfBaseMaps = function(map){
     'satelites - Esri':arcgis
     };
 
+    lfBaseBapsKeys = Object.keys( baseMaps );
+    
     return baseMaps;
 
 
 }
 
-export { lfBaseMaps, lfBaseBapsAttribution }
+export { lfBaseMaps, lfBaseBapsAttribution,lfBaseBapsKeys }

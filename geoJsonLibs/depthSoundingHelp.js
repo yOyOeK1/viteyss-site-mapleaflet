@@ -17,7 +17,7 @@ class depthSoundinOverLay{
         // resume color palet scale on load colorM
         let depthColPresConf_from_locStoH = localStorageH.getK(this.map.settKey+'depthColPresets', '' );
         let colorM = undefined;
-        if( depthColPresConf_from_locStoH != '' ){
+        if( 0&& depthColPresConf_from_locStoH != '' ){
             console.log('depth color presets from '+this.map.settKey+'  xxlocStoH3 using from settings ....');
             let j = JSON.parse( depthColPresConf_from_locStoH );
             colorM = this.getPresetById(j['presets'], j['selected'] )['colorM'];
@@ -121,10 +121,10 @@ class depthSoundinOverLay{
         
         fetchMapiosList().then(data=>{
             //console.log('have list !!!', data);
-            console.log('have list !!! cellSize', this.gridCellSize);
+            //console.log('have list !!! cellSize', this.gridCellSize);
             if( data != 'error' ){
                 this.lastData = data;
-                console.log('have dbSoundings ...');
+                //console.log('have dbSoundings ...');
                 if( this.LgeoJsonDbDepths == -1 ){
                     this.LgeoJsonDbDepths = this.geoH.makeJso(data);
                     this.LgeoJsonDbDepths.addTo( this.map );
@@ -134,7 +134,7 @@ class depthSoundinOverLay{
 
 
                 if( this.LgeoJsonDbDepths != -1 ){
-                    console.log('have old geo depths....');
+                    //console.log('have old geo depths....');
                     if( this.updateDelay != -1 ){
                         clearTimeout( this.updateDelay );
                         this.updateDelay = -1;

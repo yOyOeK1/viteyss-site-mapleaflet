@@ -196,9 +196,8 @@ class serverMapLeaflet{
                     "lng": parseFloat(ne[1])
                 }
                 };
-            this.cl(['dbSoundings .... ','cells:', cells,"mapBound:",map]);
+            //this.cl(['dbSoundings .... ','cells:', cells,"mapBound:",map]);
             let dbO = dbSoundingsToData.getDb;
-            
             dbSoundingsToData.selectByRaster( dbO, map, 20000, onDbDone, cells[0], cells[1] );
             return 1;
             

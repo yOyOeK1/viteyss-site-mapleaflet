@@ -35,7 +35,6 @@ class s_vysmapleafletPage{
     wqHandlerr_install(this);
 
     this.ll = {
-
     };
 
   }
@@ -49,9 +48,47 @@ class s_vysmapleafletPage{
     return "#ffffff";
   }
   
+
+
   getHtml = () => {
+
+    let contextMenuObj = contextMenuSimple( this.homeUrl );
     
-    
+    this.mioApp = createApp( MapioMapio,  
+      {'mapname':"mio", 
+          'mapOpts':{
+            'abc':1,
+            'zoomControl': false,
+            'center': [ 9.562813071565845,-78.86047482490541], 
+            'zoom':16
+          },
+          'useSettingToResume':true,
+          //'fileLoad': false, 
+          'homeUrl': this.homeUrl, 
+          'addSmallLatLon': true, 
+          'addlfBaseMaps': true,
+          'addFullScreenBt': false,
+          'addFallbackTiles': false,
+          'addGrid': false,
+          'addContextMenu': contextMenuObj,
+          'addOSD': false,
+          'depthSoundings': '../conturesTest/LogDepth.db'
+        } );
+    this.mioApp1 = createApp( MapioMapio, 
+      {'mapname':"mioMap2", 
+        'mapioDirs': true,
+        'addFullScreenBt': true,
+        'addFallbackTiles': false,
+        'addGrid': true,
+        'fileLoad': true, 
+        'homeUrl': this.homeUrl,  
+        'addlfBaseMaps': false,
+        'depthSoundings': '../conturesTest/LogDepth.db'
+        
+      } );
+
+
+
 
     return `<style>
     .leaflet-control-attribution{
@@ -103,85 +140,45 @@ class s_vysmapleafletPage{
   getHtmlAfterLoad = () =>{
     cl(`${this.getName} - getHtmlAfterLoad()`);
     
-
-    let contextMenuObj = contextMenuSimple( this.homeUrl );
     
-    //setTimeout(()=>{
-      this.mioApp = createApp( MapioMapio,  
-        {'mapname':"mio", 
-            'mapOpts':{
-              'abc':1,
-              'zoomControl': true,
-              'center': [
-                //9.472598206607001,-78.96273136138917
-                //9.472616667,-78.962383333
-                
-                //9.471910340675768,-78.96352529525758
-                9.562813071565845,-78.86047482490541
-                //39.7471494,-104.9998241
-                ], 
-              'zoom':16
-            },
-            'useSettingToResume':true,
-            //'fileLoad': false, 
-            'homeUrl': this.homeUrl, 
-            'addSmallLatLon': true, 
-            'addlfBaseMaps': true,
-            'addFullScreenBt': false,
-            'addFallbackTiles': false,
-            'addGrid': false,
-            'addContextMenu': contextMenuObj,
-            'addOSD': false,
-            'depthSoundings': '../conturesTest/LogDepth.db'
-          } ).mount('#lfmapio');
-      this.mioApp1 = createApp( MapioMapio, 
-        {'mapname':"mioMap2", 
-            'mapioDirs': true,
-            'addFullScreenBt': true,
-            'addFallbackTiles': false,
-            'addGrid': true,
-            'fileLoad': true, 
-            'homeUrl': this.homeUrl,  
-            'addlfBaseMaps': false,
-            'depthSoundings': '../conturesTest/LogDepth.db'
-          
-          } ).mount('#lfmapio2');
+    this.mioApp.mount('#lfmapio');
+    this.mioApp1.mount('#lfmapio2');
 
-      // for context menu 
-      setMapObject( pager._page.mioApp.$data.map );
+    // for context menu 
+    setMapObject( pager._page.mioApp._instance.data.map );
 
 
-      // svg osd on map?
-      if(0){
-        let myOlDiv = lfMakeKmPanel( this.mioApp.$data.map, this.homeUrl, 'osdDivTest' );
-        $.get( `${this.homeUrl}assets/osdMapTest1.svg`, function( data, status ){
-          siteByKey.s_multiSVGPage.o.mulSvgParseGet( data  , status, false, '.osdDivTest' );
-        });
-      }
+    // svg osd on map?
+    if(0){
+      let myOlDiv = lfMakeKmPanel( this.mioApp._instance.data.map, this.homeUrl, 'osdDivTest' );
+      $.get( `${this.homeUrl}assets/osdMapTest1.svg`, function( data, status ){
+        siteByKey.s_multiSVGPage.o.mulSvgParseGet( data  , status, false, '.osdDivTest' );
+      });
+    }
 
       
 
       
 
-      // bind move 
-      var syncMapTopToBottom = () => {
-        console.log('moveend2 ... sync ');
-        this.ll['last'] = this.mioApp.$data.map.getCenter();
-        this.ll['zoom'] = this.mioApp.$data.map.getZoom();
+    // bind move 
+    var syncMapTopToBottom = () => {
+      console.log('moveend2 ... sync ');
+      this.ll['last'] = this.mioApp._instance.data.map.getCenter();
+      this.ll['zoom'] = this.mioApp._instance.data.map.getZoom();
 
-        this.mioApp1.$data.map.setView( this.ll['last'], this.ll['zoom'] );
-        console.log('moveend2 ... sync .. DONE');
-        
-      };
-      if( 1 ){
-        this.mioApp.$data.map.on( 'moveend', (e='')=>{
-          //console.log('connect moveend ....');
-         // this.mPanel._instance.ctx.onMoveDoneEvent( {'lfmap':this.map} );
-          syncMapTopToBottom();
-        });
+      this.mioApp1._instance.data.map.setView( this.ll['last'], this.ll['zoom'] );
+      console.log('moveend2 ... sync .. DONE');
+      
+    };
+    if( 1 ){
+      this.mioApp._instance.data.map.on( 'moveend', (e='')=>{
+        //console.log('connect moveend ....');
+        // this.mPanel._instance.ctx.onMoveDoneEvent( {'lfmap':this.map} );
+        syncMapTopToBottom();
+      });
 
-        setTimeout(()=>{ syncMapTopToBottom(); },800);
-      }
+      setTimeout(()=>{ syncMapTopToBottom(); },800);
+    }
 
     //},500);
     /*
@@ -247,6 +244,15 @@ class s_vysmapleafletPage{
 
     },1000);
   }
+
+  onPageLeft = () =>{
+    console.log('onPageLeft ....', this.mioApp, this.mioApp1);
+    this.mioApp.unmount();
+    this.mioApp1.unmount();
+    console.log('... unmount vue');
+
+  }
+
 
   get svgDyno(){
     return '';
