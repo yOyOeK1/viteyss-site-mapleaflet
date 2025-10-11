@@ -23,7 +23,13 @@ let lfBaseMaps = function(map){
         maxZoom: 19,
     });
     lfBaseBapsAttribution.push('© OpenStreetMap contributors, Tiles style by Humanitarian OpenStreetMap Team hosted by OpenStreetMap France');
-      
+    
+    var arcgis = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 18,
+    });
+    lfBaseBapsAttribution.push('© Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community');
+    
+
     let lftileLayer_workDark = L.tileLayer(onlineMaps['osmDarkAll']['proxy'], {
         maxZoom: 19,
     });//.addTo(this.lfmap);
@@ -35,7 +41,8 @@ let lfBaseMaps = function(map){
     "OpenStreetMap,CyclOSM": lftileLayer_cyclOSM,
     "OpenStreetMap,Cycle": lftileLayer_cycle,
     "OpenStreetMap.dark": lftileLayer_workDark,
-    "OpenStreetMap.HOT": osmHOT
+    "OpenStreetMap.HOT": osmHOT,
+    'satelites - Esri':arcgis
     };
 
     return baseMaps;
