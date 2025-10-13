@@ -83,6 +83,12 @@ class miMesureDist{
 
 let miMesDis;
 
+
+function showCoordinatesOver_mapioShare(e){
+    console.log('share cooridnates over q2 ',e);
+    q2.emit('and/mapioShare/cmd',{doIt:"addMarker",ll:[e.latlng.lat, e.latlng.lng],id:'share.'+Date.now()}) 
+}
+
 function showCoordinates (e) {
     //alert(e.latlng);
     $.toast({
@@ -186,7 +192,13 @@ let contextMenuSimple = function(  homeUrl ) {
         }, {
             text: 'Center map here',
             callback: centerMap
-        }, '-', 
+        },
+        // share poi q2.emit('and/mapioShare/cmd',{doIt:"addMarker",ll:[9.481593249618884,-78.63517198929484]}) 
+        {
+            text: '<i class="fa-solid fa-share-nodes"></i> Share POI',
+            callback: showCoordinatesOver_mapioShare
+        },
+        '-', 
         {
             text: 'Zoom in',
             icon: `${homeUrl}assets/zoom-in.png`,

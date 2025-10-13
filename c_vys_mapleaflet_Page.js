@@ -9,10 +9,15 @@ import { lfMakeSmallLatLonToClipboard } from "./lfMakeSmallLatLonBanToClipBoard"
 import { lfOverLayMaps } from "./lfoverlayMaps";
 import onlineMaps from "./onlineMaps";
 import { createApp } from 'vue';
-import { wqHandlerr_install } from "./wqHandlers";
+
+
+
+
+
 import { geoJtest1 } from './workGeojson/test1.js'
 import { geoJ1 } from "./geoJsonLibs/geoj1.js";
 import { geoJ2 } from "./geoJsonLibs/geoj2.js";
+import { wqh_mapleaflet } from "./wqh_mapleaflet.js";
 
 
 
@@ -21,7 +26,7 @@ class s_vysmapleafletPage{
   constructor(){
 
     this.geoJ1 = geoJtest1;
-    this.lfmap = -1;
+    //this.lfmap = -1;
     this.lflayCon = -1;
     this.lfpanel = -1;
     this.lftileLayer_osm = -1;
@@ -32,7 +37,11 @@ class s_vysmapleafletPage{
     this.mioApp1 = -1;
     this.mPanel = -1;
     this.lcFileGpx = -1;
-    wqHandlerr_install(this);
+
+    this.q2handlers = new wqh_mapleaflet().getHandlers();
+    
+
+    
 
     this.ll = {
     };
@@ -48,6 +57,27 @@ class s_vysmapleafletPage{
     return "#ffffff";
   }
   
+
+
+  getJsIncludeHtml = () => {
+    return `
+      <style>
+    .leaflet-control-attribution{
+      display: none;
+    }
+    </style>
+    <link rel="stylesheet" href="${this.homeUrl}node_modules/leaflet/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+    <script src="${this.homeUrl}node_modules/leaflet/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="${this.homeUrl}assets/togeojson.js"></script>
+    <script src="${this.homeUrl}assets/leaflet.filelayer.js"></script>
+    <link rel="stylesheet" href="${this.homeUrl}assets/leaflet.fullscreen.Control.FullScreen.css">
+    <script src="${this.homeUrl}assets/leaflet.fullscreen.Control.FullScreen.js"></script>
+    <script src="${this.homeUrl}assets/leaflet.tilelayer.fallback.js"></script>
+    <link rel="stylesheet" href="${this.homeUrl}assets/leaflet.contextmenu.css">
+    <script src="${this.homeUrl}assets/leaflet.contextmenu.js"></script>
+    <script src="${this.homeUrl}assets/leaflet.latlng-graticule.js"></script>
+    `;
+  }
 
 
   getHtml = () => {
@@ -72,7 +102,8 @@ class s_vysmapleafletPage{
           'addGrid': false,
           'addContextMenu': contextMenuObj,
           'addOSD': false,
-          'depthSoundings': '../conturesTest/LogDepth.db'
+          'depthSoundings': '../conturesTest/LogDepth.db',
+          'mapioShareIt':true
         } );
     this.mioApp1 = createApp( MapioMapio, 
       {'mapname':"mioMap2", 
@@ -87,24 +118,7 @@ class s_vysmapleafletPage{
         
       } );
 
-
-
-
-    return `<style>
-    .leaflet-control-attribution{
-      display: none;
-    }
-    </style>
-    <link rel="stylesheet" href="${this.homeUrl}node_modules/leaflet/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
-    <script src="${this.homeUrl}node_modules/leaflet/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <script src="${this.homeUrl}assets/togeojson.js"></script>
-    <script src="${this.homeUrl}assets/leaflet.filelayer.js"></script>
-    <link rel="stylesheet" href="${this.homeUrl}assets/leaflet.fullscreen.Control.FullScreen.css">
-    <script src="${this.homeUrl}assets/leaflet.fullscreen.Control.FullScreen.js"></script>
-    <script src="${this.homeUrl}assets/leaflet.tilelayer.fallback.js"></script>
-    <link rel="stylesheet" href="${this.homeUrl}assets/leaflet.contextmenu.css">
-    <script src="${this.homeUrl}assets/leaflet.contextmenu.js"></script>
-    <script src="${this.homeUrl}assets/leaflet.latlng-graticule.js"></script>
+    return this.getJsIncludeHtml()+`
 <!--
     <b>${this.getName}</b><br>
     <img src="${this.homeUrl}assets/ico_viteyss_32.png"><br>
@@ -124,9 +138,9 @@ class s_vysmapleafletPage{
 
   }
 
-  lfAddMarker = ( ll )=>{
-    L.marker( ll ).addTo( this.lfmap );
-  }
+  //lfAddMarker = ( ll )=>{
+  //  L.marker( ll ).addTo( this.lfmap );
+  //}
 
 
   addMapOverlay=()=>{

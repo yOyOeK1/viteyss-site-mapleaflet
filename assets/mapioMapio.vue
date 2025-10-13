@@ -16,6 +16,7 @@ import { depthSoundinOverLay } from '../geoJsonLibs/depthSoundingHelp';
 import CSettings from '../compSettings/cSettings.vue';
 import DepthColorPicker from '../geoJsonLibs/depthColorPicker.vue';
 import DepthColorsPreesets from '../geoJsonLibs/depthColorsPreesets.vue';
+import { mapioShare } from './mapioShare';
 //import { dbSoundingsToData } from '../geoJsonLibs/fromdb';
 
 
@@ -35,7 +36,8 @@ export default{
         'useHash': { type:Boolean, default: true }, // put and restore hash url
         'addOSD': { default: false },
         'depthSoundings': { default: "" },
-        'useSettingToResume': { default: false }
+        'useSettingToResume': { default: false },
+        'mapioShareIt': { default: false }
     },
     data(){
         let map = ref();
@@ -57,7 +59,8 @@ export default{
             confT1: ref(Object()),
             mapll: ref({lat:0.0, lng:0.0}),
             settKey: `mapio/${this.mapname}/`,
-            lfbm:ref(Object()),currBaseMapO: ref(Object()), lfbmKeySel: '' // for base map and settings
+            lfbm:ref(Object()),currBaseMapO: ref(Object()), lfbmKeySel: '', // for base map and settings
+            mapioShareO: ref(Object())
          };
     },
     methods:{
@@ -104,7 +107,12 @@ export default{
 
         console.log('mapio ['+this.mapname+'] opts: '+JSON.stringify(this.mapOpts,null,2));
 
-        this.map = L.map( this.mapname, this.mapOpts);
+        try{
+            this.map = L.map( this.mapname, this.mapOpts);
+
+        }catch(e){
+            console.error('WTF --------------------ERROR\n',e,"\n----------------------- ERRORR");
+        }
         this.map['settKey'] = this.settKey;
         this.map['mapname'] = this.mapname;
         
@@ -150,15 +158,31 @@ export default{
 
 
 
+        // mapio share
+        if( this.mapioShareIt == true ){
+            setTimeout(()=>{
+                console.log('mapio '+this.mapname+' install share ....');
+                this.mapioShareO = new mapioShare( this );
+            },2500);
+        }
+
+        // mapio share END
+
+
+
+
+
 
         // base map 
 
 
         if( this.addlfBaseMaps ){
-            if( 0 ){
-                this.control = L.control.layers( lfBaseMaps( this.map ), 
+            if( this.useSettingToResume == false ){
+                let lfbm = lfBaseMaps( this.map );
+                this.control = L.control.layers( lfbm, 
                     //lfOverLayMaps( this.lfmap, this.homeUrl )
                 ).addTo( this.map );
+                lfbm['OpenStreetMap,CyclOSM'].addTo( this.map );
             } else if( 1 ){
                 this.control = L.control.layers( {} ).addTo( this.map );
                 this.lfbm = lfBaseMaps( this.map );
@@ -188,9 +212,10 @@ export default{
 
         };
 
-
         // base map end 
         
+
+
         if( this.addFullScreenBt ){
             this.fsControl = L.control.fullscreen();
             this.map.addControl( this.fsControl );
@@ -262,7 +287,7 @@ export default{
 
 
         // settings
-        if(1){
+        if( this.useSettingToResume == true ){
             let kName = 'osdDivSettings'+this.mapname
             let mySettDiv = lfMakeKmPanel( this.map, this.homeUrl, kName );
             $('.'+kName).html(`<button id="${kName}Open">stgs</button>`);
