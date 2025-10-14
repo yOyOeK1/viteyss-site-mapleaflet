@@ -17,6 +17,7 @@ import CSettings from '../compSettings/cSettings.vue';
 import DepthColorPicker from '../geoJsonLibs/depthColorPicker.vue';
 import DepthColorsPreesets from '../geoJsonLibs/depthColorsPreesets.vue';
 import { mapioShare } from './mapioShare';
+import GpxsManager from '../workGpx/gpxsManager.vue';
 //import { dbSoundingsToData } from '../geoJsonLibs/fromdb';
 
 
@@ -37,7 +38,8 @@ export default{
         'addOSD': { default: false },
         'depthSoundings': { default: "" },
         'useSettingToResume': { default: false },
-        'mapioShareIt': { default: false }
+        'mapioShareIt': { default: false },
+        'useGpxsManager': { default: false }
     },
     data(){
         let map = ref();
@@ -60,7 +62,8 @@ export default{
             mapll: ref({lat:0.0, lng:0.0}),
             settKey: `mapio/${this.mapname}/`,
             lfbm:ref(Object()),currBaseMapO: ref(Object()), lfbmKeySel: '', // for base map and settings
-            mapioShareO: ref(Object())
+            mapioShareO: ref(Object()),
+            gpxsManager: ref(Object()), gpxsPanel: ref(Object())
          };
     },
     methods:{
@@ -214,6 +217,23 @@ export default{
 
         // base map end 
         
+
+
+
+        // useGpxsManager start
+        
+        if( this.useGpxsManager == true ){
+            console.log('useGpxsManager gpx\'s');
+            let gpxsPanelDivName = 'gpxs'+this.mapname;
+            lfMakeKmPanel( this.map, this.homeUrl, gpxsPanelDivName );
+            this.gpxsManager = createApp( GpxsManager, { mapio: this } );
+            this.gpxsManager.mount( `.${gpxsPanelDivName}` );
+        } 
+        
+        // useGpxsManager END
+
+
+
 
 
         if( this.addFullScreenBt ){

@@ -103,7 +103,8 @@ class s_vysmapleafletPage{
           'addContextMenu': contextMenuObj,
           'addOSD': false,
           'depthSoundings': '../conturesTest/LogDepth.db',
-          'mapioShareIt':true
+          'mapioShareIt':true,
+          'useGpxsManager': true
         } );
     this.mioApp1 = createApp( MapioMapio, 
       {'mapname':"mioMap2", 

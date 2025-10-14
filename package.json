@@ -11,6 +11,7 @@
   "license": "MIT",
   "description": "Map on leafletjs",
   "dependencies": {
+    "gpxparser": "^3.0.8",
     "leaflet": "^1.9.4",
     "leaflet-auto-graticule": "^2.0.0",
     "sqlite3": "^5.1.7",
@@ -24,7 +25,8 @@
     "leaflet",
     "vue",
     "kap",
-    "kml"
+    "kml",
+    "gpx"
   ],
   "wsqq": {
     "background": true,

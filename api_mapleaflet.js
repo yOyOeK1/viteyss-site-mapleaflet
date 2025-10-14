@@ -22,6 +22,8 @@ import { savePhotoFromAPI } from "./fetchhttps.js";
 import { kapLookInDir } from "./kapHelp.js";
 import { kmlLookInDir } from "./kmlHelp.js";
 import { dbSoundingsToData } from "./geoJsonLibs/fromdb.js";
+import { gpxHelp } from "./workGpx/gpxHelp.js";
+
 
 
 
@@ -44,6 +46,11 @@ class serverMapLeaflet{
         
         this.cl(`init .... will handle ${this.method} at ${this.url}`);
 
+
+        this.gpxH = new gpxHelp({
+            homePath: '/home/yoyo/Apps/viteyss-site-mapleaflet/workGpx/homePathTest',
+            dbPath: '/home/yoyo/Apps/viteyss-site-mapleaflet/workGpx/homePathTest/dbGpx.db'
+        });
 
 
         const agent = new Agent({
@@ -160,6 +167,23 @@ class serverMapLeaflet{
     }
 
 
+    doGeT_gpxQ=( req, res, bUrl )=>{
+        let tr = {};
+
+
+
+        if( bUrl.endsWith('/getAll') ){
+            this.gpxH.dbh.q_getAll(( rows )=>{
+                res.end(JSON.stringify(rows,null,4));
+            }); 
+        }
+
+
+
+        return 1;
+    }
+
+
     async doIt( req, res ){
 
 
@@ -172,6 +196,10 @@ class serverMapLeaflet{
 
         }else if( bUrl.startsWith('getMapio/') ){
             return this.doGetMapio( req,res, bUrl );
+
+        }else if( bUrl.startsWith('gpxQ/') ){
+            console.log('gpxQ !');
+            return this.doGeT_gpxQ( req, res, bUrl );
 
          }else if( bUrl.endsWith('dbSoundings') ){
 
