@@ -29,6 +29,7 @@ class s_vysmapleafletPage{
     //this.lfmap = -1;
     this.lflayCon = -1;
     this.lfpanel = -1;
+    this.contextMenuObj = -1;
     this.lftileLayer_osm = -1;
     this.lftileLayer_work = -1;
     this.onlineMaps = onlineMaps;
@@ -67,6 +68,7 @@ class s_vysmapleafletPage{
     }
     </style>
     <link rel="stylesheet" href="${this.homeUrl}node_modules/leaflet/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+    <link rel="stylesheet" href="${this.homeUrl}assets/leaflet_webpackFix.css">
     <script src="${this.homeUrl}node_modules/leaflet/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="${this.homeUrl}assets/togeojson.js"></script>
     <script src="${this.homeUrl}assets/leaflet.filelayer.js"></script>
@@ -82,7 +84,7 @@ class s_vysmapleafletPage{
 
   getHtml = () => {
 
-    let contextMenuObj = contextMenuSimple( this.homeUrl );
+    this.contextMenuObj = new contextMenuSimple( this.homeUrl );
     
     this.mioApp = createApp( MapioMapio,  
       {'mapname':"mio", 
@@ -100,9 +102,9 @@ class s_vysmapleafletPage{
           'addFullScreenBt': false,
           'addFallbackTiles': false,
           'addGrid': false,
-          'addContextMenu': contextMenuObj,
+          'addContextMenu': this.contextMenuObj,
           'addOSD': false,
-          'depthSoundings': '../conturesTest/LogDepth.db',
+          //'depthSoundings': '../conturesTest/LogDepth.db',
           'mapioShareIt':true,
           'useGpxsManager': true
         } );
@@ -111,11 +113,12 @@ class s_vysmapleafletPage{
         'mapioDirs': true,
         'addFullScreenBt': true,
         'addFallbackTiles': false,
-        'addGrid': true,
-        'fileLoad': true, 
+        //'addGrid': true,
+        //'fileLoad': true, 
         'homeUrl': this.homeUrl,  
         'addlfBaseMaps': false,
-        'depthSoundings': '../conturesTest/LogDepth.db'
+        'depthSoundings': '../conturesTest/LogDepth.db',
+        //'useGpxsManager': true
         
       } );
 
@@ -160,9 +163,7 @@ class s_vysmapleafletPage{
     this.mioApp1.mount('#lfmapio2');
 
     // for context menu 
-    setMapObject( pager._page.mioApp._instance.data.map );
-
-
+    
     // svg osd on map?
     if(0){
       let myOlDiv = lfMakeKmPanel( this.mioApp._instance.data.map, this.homeUrl, 'osdDivTest' );
@@ -256,6 +257,8 @@ class s_vysmapleafletPage{
 
     setTimeout(()=>{
       sOutSend('wsClientIdent:mapio');
+
+      gpxsManager.openInfoOf('waypoints',1,'moveMapTo');
 
     },1000);
   }

@@ -144,6 +144,7 @@ class depthSoundinOverLay{
                             this.LgeoJsonDbDepths.clearLayers();
                             //this.control.removeLayer( this.this.LgeoJsonDbDepths );
                             this.LgeoJsonDbDepths.addData( data );
+                            this.LgeoJsonDbDepths.bringToBack();
                             //this.geoHelper.doResizeLayers( this.map, this.LgeoJsonDbDepths );                            
                         },300);
                     }

@@ -360,6 +360,7 @@ gpxParser.prototype.toGeoJSON = function () {
             "time": this.metadata.time,
             "author": this.metadata.author,
             "link": this.metadata.link,
+            
         },
     };
 
@@ -381,7 +382,7 @@ gpxParser.prototype.toGeoJSON = function () {
         feature.properties.distance    = track.distance;
         feature.properties.number = track.number;
         feature.properties.link   = track.link;
-        feature.properties.type   = track.type==null?'track':track.type;
+        feature.properties.type   = 'track';
 
         for(idx in track.points) {
             let pt = track.points[idx];
@@ -418,7 +419,7 @@ gpxParser.prototype.toGeoJSON = function () {
         feature.properties.src    = track.src;
         feature.properties.number = track.number;
         feature.properties.link   = track.link;
-        feature.properties.type   = track.type;
+        feature.properties.type   = 'route';
 
 
         for(idx in track.points) {
@@ -445,6 +446,7 @@ gpxParser.prototype.toGeoJSON = function () {
                 "coordinates": []
             },
             "properties": {
+                "type": "waypoint"
             }
         };
 

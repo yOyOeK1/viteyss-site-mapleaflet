@@ -3,7 +3,7 @@
         :id="mapname">mioMap {{ mapname }}</div>
 </template>
 <script>
-import { ref, createApp } from 'vue';
+import { ref, createApp, toRaw, shallowRef } from 'vue';
 import { lfBaseMaps , lfBaseBapsAttribution, lfBaseBapsKeys } from '../lfBaseMaps';
 import { lfMakeKmPanel } from '../lfMakeKmPanel';
 import { lcFileGpxLoad } from '../lcFileGpx';
@@ -20,6 +20,7 @@ import { mapioShare } from './mapioShare';
 import GpxsManager from '../workGpx/gpxsManager.vue';
 //import { dbSoundingsToData } from '../geoJsonLibs/fromdb';
 
+var map = null;
 
 export default{
     props:{
@@ -42,7 +43,7 @@ export default{
         'useGpxsManager': { default: false }
     },
     data(){
-        let map = ref();
+        let map = shallowRef();
         let control = ref();
         let fsControl = ref(); // fullscreen controls
         let conFileLoad = ref();
@@ -103,15 +104,19 @@ export default{
         console.log('log concat mapOptions');
 
         if( this.addContextMenu != undefined ){
-            for(let k of Object.keys( this.addContextMenu) ){
-                this.mapOpts[ k ] = this.addContextMenu[ k ];
+            console.log('context menu is ',this.addContextMenu);
+            let conMenu = this.addContextMenu.getContextMenu();
+            for(let k of Object.keys( conMenu ) ){
+                this.mapOpts[ k ] = conMenu[ k ];
             }
         }
 
         console.log('mapio ['+this.mapname+'] opts: '+JSON.stringify(this.mapOpts,null,2));
 
         try{
-            this.map = L.map( this.mapname, this.mapOpts);
+            this.map = toRaw( 
+                L.map( this.mapname, toRaw(this.mapOpts))
+            );
 
         }catch(e){
             console.error('WTF --------------------ERROR\n',e,"\n----------------------- ERRORR");
@@ -119,6 +124,12 @@ export default{
         this.map['settKey'] = this.settKey;
         this.map['mapname'] = this.mapname;
         
+        
+        if( this.addContextMenu != undefined ){
+            this.addContextMenu.setMapObject( this.map );
+        }
+
+
 
         // for settings update ui if open settings
         let mapC = this.map.getCenter();
@@ -220,19 +231,7 @@ export default{
 
 
 
-        // useGpxsManager start
         
-        if( this.useGpxsManager == true ){
-            console.log('useGpxsManager gpx\'s');
-            let gpxsPanelDivName = 'gpxs'+this.mapname;
-            lfMakeKmPanel( this.map, this.homeUrl, gpxsPanelDivName );
-            this.gpxsManager = createApp( GpxsManager, { mapio: this } );
-            this.gpxsManager.mount( `.${gpxsPanelDivName}` );
-        } 
-        
-        // useGpxsManager END
-
-
 
 
 
@@ -287,10 +286,22 @@ export default{
         //// depth soundings 
 
 
+        // useGpxsManager start
+        
+        if( this.useGpxsManager == true ){
+            console.log('useGpxsManager gpx\'s');
+            let gpxsPanelDivName = 'gpxs'+this.mapname;
+            lfMakeKmPanel( this.map, this.homeUrl, gpxsPanelDivName );
+            this.gpxsManager = createApp( GpxsManager, { mapio: this } );
+            this.gpxsManager.mount( `.${gpxsPanelDivName}` );
+        } 
+        
+        // useGpxsManager END
+
 
         
         if( this.addGrid ){
-            this.olGrid = lfMakeGrid( this.map );
+            this.olGrid = new lfMakeGrid( this.map ).getolGrid();
         }
 
         // do hash adress start resume
@@ -315,7 +326,7 @@ export default{
             $('#'+kName+'Open').on('click',()=>{
                 //setOpts.methods.openPanel();
                 
-                let llzoom = map.getZoom();
+                let llzoom = this.map.getZoom();
                 let zoomSetIs = llzoom;
 
                 let onSettingsChange = (ev='', value='')=>{
