@@ -123,10 +123,13 @@ export default{
         }
         this.map['settKey'] = this.settKey;
         this.map['mapname'] = this.mapname;
+        if( !( 'mapioByName' in window ) )
+            window['mapioByName'] = {};
+        window['mapioByName'][ `${this.mapname}` ] = this;
         
         
         if( this.addContextMenu != undefined ){
-            this.addContextMenu.setMapObject( this.map );
+            this.addContextMenu.setMapObject( toRaw(this.map) );
         }
 
 
@@ -291,7 +294,7 @@ export default{
         if( this.useGpxsManager == true ){
             console.log('useGpxsManager gpx\'s');
             let gpxsPanelDivName = 'gpxs'+this.mapname;
-            lfMakeKmPanel( this.map, this.homeUrl, gpxsPanelDivName );
+            lfMakeKmPanel( toRaw(this.map), this.homeUrl, gpxsPanelDivName );
             this.gpxsManager = createApp( GpxsManager, { mapio: this } );
             this.gpxsManager.mount( `.${gpxsPanelDivName}` );
         } 
@@ -301,7 +304,7 @@ export default{
 
         
         if( this.addGrid ){
-            this.olGrid = new lfMakeGrid( this.map ).getolGrid();
+            this.olGrid = new lfMakeGrid( toRaw(this.map) ).getolGrid();
         }
 
         // do hash adress start resume

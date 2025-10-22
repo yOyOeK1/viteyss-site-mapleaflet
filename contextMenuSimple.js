@@ -1,8 +1,8 @@
-
+import { toRaw } from 'vue';
 
 class miMesureDist{
     constructor( map ){
-        this.map = map;
+        this.map =  map;
         this.p0 = -1;
         this.m0 = L.marker([0,0],{
             draggable: true,
@@ -77,10 +77,10 @@ class miMesureDist{
             this.line.removeFrom( map );
             
             
-            this.m1.setLatLng( this.p1 ).addTo( this.map );
+            this.m1.setLatLng( this.p1 ).addTo( map );
             this.line.setLatLngs( [ this.p0, this.p1 ], {
                 color: 'orange'
-            } ).addTo( this.map );
+            } ).addTo( map );
             this.getDist();
         }        
     }
@@ -212,7 +212,7 @@ class contextMenuSimple{
                 text: 'Mesure From',
                 callback: (e)=>{ 
                     if( miMesDis == undefined )
-                        miMesDis = new miMesureDist( this.map);
+                        miMesDis = new miMesureDist( this.map );
                     miMesDis.setP0( this.map, e.latlng ); 
                 }
             }, {

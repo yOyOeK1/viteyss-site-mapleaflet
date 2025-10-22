@@ -117,8 +117,8 @@ class s_vysmapleafletPage{
         //'fileLoad': true, 
         'homeUrl': this.homeUrl,  
         'addlfBaseMaps': false,
-        'depthSoundings': '../conturesTest/LogDepth.db',
-        //'useGpxsManager': true
+        //'depthSoundings': '../conturesTest/LogDepth.db',
+        'useGpxsManager': true
         
       } );
 
@@ -258,11 +258,12 @@ class s_vysmapleafletPage{
     setTimeout(()=>{
       sOutSend('wsClientIdent:mapio');
 
-      gpxsManager.openInfoOf('waypoints',1,'moveMapTo');
+      //gpxsManager.openInfoOf('waypoints',1,'moveMapTo');
 
-    },1000);
+    },2000);
+  
+
   }
-
   onPageLeft = () =>{
     console.log('onPageLeft ....', this.mioApp, this.mioApp1);
     this.mioApp.unmount();

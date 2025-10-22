@@ -59,12 +59,37 @@ class serverMapLeaflet{
         }
         })
 
+
+        this.q2 = null;
+        //this.q2_registerMe();
+
         setGlobalDispatcher(agent);
 
     }
     
     cl( str ){
         console.log(` serMapLeaflet     ${this.method}  ${this.url}     `,str);
+    }
+
+    q2_registerMe=()=>{
+        if( this.server == undefined ){
+            setTimeout(()=>{
+                this.q2_registerMe();
+            },1000);
+            return 1;
+        }
+        this.q2 = this.server.wsCBH.q2S.q2;
+        this.gpxH.setQ2( this.q2 );
+        //this.cl([`register Me at q2 -- name is:`,this.q2.getName() ]);
+        this.q2.on( 'api_mapleaflet', 'and/apis/mapleaflet/cmd', this.q2_res_cmd );
+        this.q2.on( 'api_mapleaflet_gpxsDBUpdate',
+            'and/mapioGpxsManager/gpxs/action',
+            this.gpxH.q2_handler
+         );
+
+    }
+    q2_res_cmd=( topic, p )=>{
+        this.cl(['/cmd  @ q2 payload:',p]);
     }
 
     chkFolder=( extraP='' )=>{
@@ -170,12 +195,25 @@ class serverMapLeaflet{
     doGeT_gpxQ=( req, res, bUrl )=>{
         let tr = {};
 
+        if( bUrl.endsWith('/getAll') ){            
+            this.gpxH.dbh.q_getAll(
+                ( rows )=>{
+                    this.entryDate = parseInt( Date.now() );
+                    res.end(JSON.stringify({
+                        gpxs:rows,
+                        entryDate: this.entryDate
+                    },null,4));
+                    setTimeout(()=>{  this.q2_registerMe();  },7000);
+                }
+            );
+            
+            
 
 
-        if( bUrl.endsWith('/getAll') ){
-            this.gpxH.dbh.q_getAll(( rows )=>{
+        }else if(bUrl.endsWith('/getInfo') ){
+            this.gpxH.dbh.q_getInfo(( rows )=>{
                 res.end(JSON.stringify(rows,null,4));
-            }); 
+            });
         }
 
 

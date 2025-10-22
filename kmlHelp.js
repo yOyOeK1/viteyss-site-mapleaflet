@@ -56,17 +56,17 @@ let kmlFileIdentState = function ( pathToKa, dirList ){
         let kmlStr = kmlFile.toString();
         let kjs = JSON.parse( convert.xml2json(kmlFile, {compact: true, spaces: 2} ) ); 
         let tMheaderkml = true;
-        console.log(JSON.stringify(kjs,null,4));
+        //console.log(JSON.stringify(kjs,null,4));
         let tPngPath = kjs['kml']['GroundOverlay']['name']['_text'];
         let tPng = false;
-
+        console.log(`[i] kml working on:\n\t[${pathToKa}]`);
 
         // png chk
         // from kml file
         try{
             tPng = 'errno' in fs.statSync( tPngPath ) ? false : true;
         }catch(e){
-            console.error(`error  path in\n\t[${pathToKa}] \ [${tPngPath}]\n\t not there`);
+            console.error(`\terror  path to image from file [${tPngPath}] - not there`);
         }
         // ./ local basename
         if( tPng == false ){
@@ -75,9 +75,9 @@ let kmlFileIdentState = function ( pathToKa, dirList ){
                 tPng = 'errno' in fs.statSync( asLocal ) ? false : true;
                 if( tPng )
                     tPngPath = asLocal;
-                console.log('   ok file as basename');
+                console.log(`\tok file as basename [${tPngPath}]`);
             }catch(e){
-                console.error(`error  path in\n\t[${fNameBase}] \ [${tPngPath}]\n\t not there`);
+                console.error(`\terror  path in to image  [${tPngPath}] -  not there`);
             }
         }
         

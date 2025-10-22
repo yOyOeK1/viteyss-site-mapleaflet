@@ -14,11 +14,10 @@ export default{
         return {
             inOverlay: false,
             gpxs: [],
-            geoJ: [],
+            gpxsEntryDate: ref(-1),
             lgeojson: toRaw(-1),
             lines:[],
             markers:[],
-            gpx: ref(new gpxParser()),
             gpxsEditor: ref(Object()),
             editCircle: -1,
             isEditorRunning: false,
@@ -33,17 +32,176 @@ export default{
 
         this.mountAsOverlay();
         this.getAllFromHost();
-
+        
         
 
     },
     methods:{
+        
+        gpxsOlder( srcGpxs, iEntryDate ){
+            if( parseInt( iEntryDate ) > parseInt( srcGpxs ) )
+                return true;
+            return false;
+        },
+        q2_register(){
+            setTimeout(()=>{
+                q2.on( 'meDebug'+this.mapio.mapname, 'and/mapioGpxsManager/gpxs/action', this.q2_doMyCallBack );
+            },100);
+        },
+        q2_doMyCallBack(t,p){
+            let srcMe = [q2.getName(), this.mapio.mapname];
+            console.log(`q2 -> gpxsManager [`,srcMe,`] topic:`+t,'\npayload: ',p,
+                '\nthis entryDate:',this.gpxsEntryDate
+            );
+            if( this.inOverlay == false ) return 1;
+
+            let haveEntryDate = false;
+            if( 'entryDate' in p ){
+                haveEntryDate = true;
+                let tIsIn = '?';
+                let ged = parseInt( window['gpxsEntryDate'] );
+                let ied = parseInt( p['entryDate'] );
+                let ted = parseInt( this.gpxsEntryDate );
+                if( ied == ted )
+                    tIsIn = 'same';
+                else if( ied > ted )
+                    tIsIn = 'new';
+                else
+                    tIsIn = 'old';
+
+                console.log('   msg have time stamp: '+ied+'    to '+ted,
+                    '\n\tis to local ['+tIsIn+']: '+(ied-ted)+
+                    '\n\tis to global ['+tIsIn+']: '+(ied-ged)
+                );
+
+            }
+
+
+            if( typeof(p) == 'string' ||
+                typeof(p) == 'number' ||
+                !( 'src' in p ) ||
+                !( 'action' in p ) ||
+                p == '?' 
+            ){
+                console.log('q2 -> gpxsManager $ [?] try one more time?\n\n',p,'\n\n.....................');
+                return 1;
+            }
+
+            if( 'src' in p && 'action' in p && 
+                p.action == 'dbUpdated' 
+            ){
+                console.log(' .... db updated msg OK TODO');
+
+                if( p.orgData.action == 'remove' && p.orgData.srcType == 'waypoint' ){
+                    if( this.gpxsOlder( gpxsEntryDate, p['entryDate']) ){
+                        //window['gpxs'][ p['gpxIndex'] ][ p['srcTypes'] ].push( data );
+                        //window['gpxsEntryDate'] = p['entryDate'];
+                        window['gpxs'][ p.orgData['gpxIndex'] ][ p.orgData['srcTypes'] ].splice( p.orgData['itemIndex'], 1 );
+                        window['gpxsEntryDate'] = p['entryDate'];
+                        
+                    }
+                } else if( p.msgRes == 'saved' && p.orgData.srcType == 'waypoint' ){
+                    if( this.gpxsOlder( gpxsEntryDate, p['entryDate']) ){
+                        //window['gpxs'][ p['gpxIndex'] ][ p['srcTypes'] ].push( data );
+                        //window['gpxsEntryDate'] = p['entryDate'];
+                        window['gpxs'][ p.orgData['gpxIndex'] ][ p.orgData['srcTypes'] ][ p.orgData['itemIndex'] ] = p['orgData']['data'];
+                        window['gpxsEntryDate'] = p['entryDate'];
+                        
+                    }
+                }
+
+
+
+            }else if( srcMe[0] == p['src'][0] && srcMe[1] == p['src'][1] ){
+                console.log(' ... qq2 for me ! :)');
+
+
+                if( p['action'] == 'reset' ){
+                    this.q2_action_reset( p );
+                }else if( p['action'] == 'save' ){
+                    this.q2_action_save( p );
+                }
+
+
+            }else{
+                console.log(' ... qq2 for others ! :)');
+                
+                if( p['action'] == 'save' ){
+                    this.q2_action_remove( p );
+                    this.gpxsEntryDate-=10;
+                    this.q2_action_insert( p );
+                }
+
+            }
+
+            if( p['action'] == 'remove' ){
+                this.q2_action_remove( p );
+
+            }
+        
+        },
+        q2_action_insert( p ){
+            console.log('       ...insert');
+            let srcType = p['srcTypes'].substring(0, p['srcTypes'].length-1 );
+            let data = p['data'];
+
+            if( this.gpxsOlder( this.gpxsEntryDate, p['entryDate']) ){
+                this.gpxs[ p['gpxIndex'] ][ p['srcTypes'] ].push( data );
+                this.gpxsEntryDate = p['entryDate'];
+            }
+            //window['gpxs'][ p['gpxIndex'] ][ p['srcTypes'] ].push( data );
+            //window['gpxsEntryDate'] = p['entryDate'];
+
+            this.insertGpxsDataTo_lgeojson( srcType, data );
+            //this.openInfoOf( p['srcTypes'], data['id'],  p['src'][1], 'moveMapTo' );
+        },
+        q2_action_remove( p ){
+            console.log(' ....  all.mapios      ...remove');
+            let srcType = p['srcTypes'].substring(0, p['srcTypes'].length-1 );
+            this.removeGpxsDataTo_lgeojson( srcType, p['data']['id'] );
+
+            if( this.gpxsOlder(  this.gpxsEntryDate, p['entryDate']) ){
+                this.gpxs[ p['gpxIndex'] ][ p['srcTypes'] ].splice( p['itemIndex'] , 1 );
+                this.gpxsEntryDate = p['entryDate'];
+            }
+            //window['gpxs'][ p['gpxIndex'] ][ p['srcTypes'] ].splice( p['itemIndex'], 1 );
+            //window['gpxsEntryDate'] = p['entryDate'];
+
+        },
+        q2_action_save( p ){
+            console.log('       ...save');
+            let data = p['data'];
+
+            if( this.gpxsOlder(  this.gpxsEntryDate, p['entryDate']) ){
+                this.gpxs[ p['gpxIndex'] ][ p['srcTypes'] ][ p['itemIndex'] ] = data;
+                this.gpxsEntryDate = p['entryDate'];
+            }
+            //window['gpxs'][ p['gpxIndex'] ][ p['srcTypes'] ][ p['itemIndex'] ] = data;
+            //window['gpxsEntryDate'] = p['entryDate'];
+        },
+        q2_action_reset( p ){
+            console.log('       ...reset');                    
+            let srcType = p['srcTypes'].substring(0, p['srcTypes'].length-1 );
+            let data = p['data'];
+            
+            this.removeGpxsDataTo_lgeojson( srcType, data['id'], false );
+
+            if( this.gpxsOlder( this. gpxsEntryDate, p['entryDate']) ){
+                this.gpxs[ p['gpxIndex'] ][ p['srcTypes'] ][ p['itemIndex'] ] = data;
+                this.gpxsEntryDate = p['entryDate'];
+            }
+
+            this.insertGpxsDataTo_lgeojson( srcType, data );
+            this.openInfoOf( p['srcTypes'], data['id'],  p['src'][1], 'moveMapTo' );
+
+        },
+
         findLayerInJGeo(srcType, id){
             let tr = [];
-            if( this.lgeojson == -1 ){
+            let lgeo = toRaw(this.lgeojson);
+            if( lgeo == -1 ){
                 return [];
             }
-            let lgeo = this.lgeojson;
             //console.log('lgeo',lgeo);
             lgeo.eachLayer(function(layer) {
                 //console.log("Feature", layer.feature);
@@ -57,20 +215,75 @@ export default{
                     layer.feature.properties.id == id )
                  ){
                     //console.log("Feature", layer.feature.properties.type, layer.feature.properties.id);
-                    tr.push( layer );
+                    tr.push( toRaw(layer) );
                 }
             });
             return tr;
         },
-        editThisOne(srcType, id){
-            let tr = this.findLayerInJGeo( srcType, id );
-            if( tr.length == 1 ){
-                console.log('set lEdit to ',srcType, ' id ',id);
-                window['lEdit'] = tr[0];
+        findIndexItemInGpxs( srcType, id ){
+            let tr = [];
+            if( srcType == 'gpx' ){
+                 for( let i=0,ic=this.gpxs.length; i<ic; i++ ){
+                    g = this.gpxs[ i ];
+                    if( g.id == id ){
+                        return i;
+                    }
+                }
+            } else if( ['tracks','waypoints','routes'].indexOf( srcType) != -1 ){
+                for( let gi=0,gic=this.gpxs.length; gi<gic; gi++ ){
+                    for( let ii=0, iic=this.gpxs[gi][ srcType ].length; ii<iic; ii++ ){
+                        if( this.gpxs[gi][ srcType ][ ii ].id == id ){
+                            return { gpxIndex: gi, itemIndex: ii };
+                        }
+                    }
+                }
+            } else {
+                console.info('find index item in gpx got wrong srcType ...',srcType,'   id:',id);
+            }
+
+            return -1;
+        },
+
+
+        handleData_windowGpxsChange( action, srcType, id ){
+            console.log('handleData - window gpxs change', 
+                '\naction:  ',action,
+                '\nsrcType: ',srcType,
+                '\nid:      ',id)   ;
+        },
+       
+        handleItemClick( action, srcType, id ) {
+            console.log('handleItemClick Item clicked:', 
+                '\naction:  ',action,
+                '\nsrcType: ',srcType,
+                '\nid:      ',id)   ;
+            // Perform actions based on the data received from the child
+
+            if ( action == 'reset' && srcType == 'waypoint'){
+                let ir = this.findIndexItemInGpxs( `${srcType}s`, id );
+                let data = toRaw( this.gpxsEditor._instance.ctx.$data.orgData['data'] );
+                
+                //console.log('index look res     new .   src:',ir['gpxIndex'],' item:',ir['itemIndex'] );
+
+                this.removeGpxsDataTo_lgeojson( srcType, id, true );
+                this.gpxs[ ir['gpxIndex'] ][`${srcType}s`][ ir['itemIndex'] ] = data;
+
+                this.insertGpxsDataTo_lgeojson( srcType, data );
+
+                this.openInfoOf( `${srcType}s`, data.id,  this.mapio.mapname, 'moveMapTo' );
             }
 
         },
-        removeThisOne(srcType, id, closePanelAtEnd = true){
+
+
+
+        insertGpxsDataTo_lgeojson( srcType,data ){
+            let mGpx = new gpxParser();
+            mGpx[`${srcType}s`].push( data ); 
+            let mjGeo = mGpx.toGeoJSON();
+            toRaw(this.lgeojson).addData( mjGeo );
+        },
+        removeGpxsDataTo_lgeojson(srcType, id, closePanelAtEnd = true){
             let tr = this.findLayerInJGeo( srcType, id );
 
             console.log('remove this ones ',tr.length);
@@ -85,6 +298,16 @@ export default{
                setOpts.methods.closePanel();
 
         },
+         // need to be change
+        editThisOne(srcType, id){
+            let tr = this.findLayerInJGeo( srcType, id );
+            if( tr.length == 1 ){
+                console.log('set lEdit to ',srcType, ' id ',id);
+                window['lEdit'] = tr[0];
+            }
+
+        },
+        
         utilsdistanceToNice( distance ){
             //console.log('utilsdistanceToNice: ',distance);
             let unit = 'm';
@@ -127,26 +350,12 @@ export default{
             });
 
         },
-        onNewData(){
-            console.log('gpx\'s onNewData .....'+this.gpxs.length);
-            this.gpx.tracks = [];
-            this.gpx.routes = [];
-            this.gpx.waypoints = [];
-            for( let s of this.gpxs ){
-                for( let t of s.tracks)
-                    this.gpx.tracks.push( t );
-                for( let r of s.routes)
-                    this.gpx.routes.push( r );
-                for( let w of s.waypoints)
-                    this.gpx.waypoints.push( w );
-            }
-            //console.log('gpx\'s waypoints:',this.gpx.waypoints);
-            this.makeGeoJsonOverlay();
-
-        },
         destroyGeoJsonOverlay(){
             if( this.inOverlay == true ){
                 this.lgeojson.remove( toRaw(this.mapio.map) );
+                this.lgeojson = null;
+                this.gpxs = null;
+                this.gpxsEntryDate = -1
             }
         },
         getIcon(name){
@@ -175,27 +384,83 @@ export default{
                     iconAnchor: [12, 41],
                     popupAnchor: [1, -34],
                     shadowSize: [41, 41]
-                })
+                }),
+                'notFound':L.icon({
+                    iconUrl: this.mapio.homeUrl+'assets/mapMarkers/ink-marker-notFound.png', // Replace with your green marker image path
+                    shadowUrl: this.mapio.homeUrl+'assets/mapMarkers/marker-shadow.png', // Replace with your shadow image path
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34],
+                    shadowSize: [41, 41]
+                }),
             };
+
+            let keys = Object.keys( icons );
+            if( keys.indexOf( name ) == -1 ){
+
+                if( name.startsWith( 'markicons/') && 
+                    ( name.endsWith('.svg') || name.endsWith('.png') )
+                 ){
+                    return L.icon({
+                        iconUrl: this.mapio.homeUrl+'assets/mapMarkers/'+name, // Replace with your green marker image path
+                        //shadowUrl: this.mapio.homeUrl+'assets/mapMarkers/marker-shadow.png', // Replace with your shadow image path
+                        iconSize: [25, 25],
+                        iconAnchor: [12, 12],
+                        popupAnchor: [0, -10],
+                        //shadowSize: [41, 41]
+                    });
+                }else if( name.startsWith( '2markicons/') && 
+                    ( name.endsWith('.svg') || name.endsWith('.png') )
+                 ){
+                    name = name.substring(1);
+                    return L.icon({
+                        iconUrl: this.mapio.homeUrl+'assets/mapMarkers/'+name, // Replace with your green marker image path
+                        //shadowUrl: this.mapio.homeUrl+'assets/mapMarkers/marker-shadow.png', // Replace with your shadow image path
+                        iconSize: [40, 40],
+                        iconAnchor: [20, 20],
+                        popupAnchor: [0, -10],
+                        //shadowSize: [41, 41]
+                    });
+                }
+
+
+
+                return icons['notFound'];
+            }
 
             return icons[ name ];
         },
-        makeGeoJsonOverlay(){
-            console.log('gpx\'s make geojson ......');
-            this.geoJ = this.gpx.toGeoJSON();
-            //this.geoJ = this.gpxJ.features;
-            console.log( this.geoJ );
-            console.log('gpx\'s make geojson ......DONE',
-                '\nso: waypoints:'+this.gpx.waypoints.length,
-                '\nso: tracks:'+this.gpx.tracks.length,
-                '\nso: routes:'+this.gpx.routes.length
+        onNewGpxs( ){
+            console.log('gpx\'s onNewGpxs .....'+this.gpxs.length);
+            let gpxP = new gpxParser();
+            gpxP.tracks = [];
+            gpxP.routes = [];
+            gpxP.waypoints = [];
+            for( let s of this.gpxs ){
+                for( let t of s.tracks)
+                    gpxP.tracks.push( t );
+                for( let r of s.routes)
+                    gpxP.routes.push( r );
+                for( let w of s.waypoints)
+                    gpxP.waypoints.push( w );
+            }
+            console.log('gpx\'s -> onNewGpxs make geojson ...... from gpxP ',
+                '\nso: waypoints:'+gpxP.waypoints.length,
+                '\nso: tracks:'+gpxP.tracks.length,
+                '\nso: routes:'+gpxP.routes.length
             );
+            this.makeGeoJsonOverlay( gpxP.toGeoJSON() );
+
+        },
+        makeGeoJsonOverlay( geoJ ){
+            //console.log( geoJ );
             let tutilsdistanceToNice = this.utilsdistanceToNice;
             let tGetIcon = this.getIcon;
             let thomeUrl = this.mapio.homeUrl;
             let tmap = toRaw(this.mapio.map);
             let tmakePointToLayer = this.makePointToLayer;
-            this.lgeojson = toRaw( L.geoJSON( this.geoJ,
+            this.lgeojson = null;
+            this.lgeojson = toRaw( L.geoJSON( geoJ,
             {
                 style: function (feature) { 
                     if(feature.properties.name ){
@@ -270,7 +535,7 @@ export default{
         },
         makePopupContent( IDStr, prop, srcType ){
             return ''+
-                `<a onclick="gpxsManager.openInfoOf('${srcType}','${prop.id}');"
+                `<a onclick="gpxsManager.openInfoOf('${srcType}','${prop.id}','${this.mapio.mapname}');"
                     title="${IDStr}"
                     ><i class="fa-solid fa-circle-info"></i></a> `+
                 (prop.name == null ? `${srcType} No#`+prop.id : prop.name )+
@@ -306,8 +571,16 @@ export default{
 
 
         },
-        openInfoOf( srcType, id, opts = '' ){
-            let tmap = toRaw(this.mapio.map);
+        openInfoOf( srcType, id, mapname, opts = '' ){
+            console.log('openInfo of map',mapname,' my name is?:',this.mapio.mapname);
+            
+            if( mapname != this.mapio.mapname ){
+                console.log('   .... wrong one :P');
+                mapioByName[ mapname ]['gpxsManager']._instance.ctx.openInfoOf( srcType, id, mapname, opts = '' );
+                return 1;
+            }
+            let tmap = toRaw(window['mapioByName'][mapname].map);
+            
 
             /*
             this.lgeojson.eachLayer(function(layer) {
@@ -329,11 +602,19 @@ export default{
                 this.isEditorRunning = false;
             }
 
+            let srcT = srcType.substring(0,srcType.length-1);            
+            let tr = this.findLayerInJGeo( srcT, id);
+            if( tr.length != 1 ){
+                console.error('wrong count in result! should be 1 \n',tr);
+                return 1;
+            }
+            console.log('       .. in open info of tr is \n',tr);
+
             let onPanelReadyForEditor = ( divName )=>{
                 this.gpxsEditor = createApp( GpxsViewer, {} );
                 this.gpxsEditor.mount(`#${divName}`);
                 this.isEditorRunning = true;
-                this.gpxsEditor._instance.ctx.startEdit( srcType, id );
+                this.gpxsEditor._instance.ctx.startEdit( mapname, srcType, id );
                 if( opts == 'moveMapTo'){
                     //console.log('move to ',this.gpxsEditor._instance.ctx.$data.data.lat, this.gpxsEditor._instance.ctx.$data.data.lon);
                     this.lgeojson.closePopup();
@@ -345,15 +626,15 @@ export default{
 
                 }
             };
+            
             console.log('openInfo of ',srcType, ' id:',id);
             if( setOpts.isOpen )
                 setOpts.methods.closePanel();
             setOpts.openPanelWithDiv(`Info - ${srcType} (${id})`, onPanelReadyForEditor, this.onPanelClone );
             
-            let srcT = srcType.substring(0,srcType.length-1);            
-            let tr = this.findLayerInJGeo( srcT, id);
 
             this.lgeojson.closePopup();
+
             for( let l of tr ){
                 if( srcType == 'waypoints' ){
                     l.dragging.enable();
@@ -410,16 +691,52 @@ export default{
 
         },
 
+        getFetchAsJson_test1(){
+            
+            this.getFetchAsJson( 'getInfo', {}, ( j )=>{ 
+                console.log('test1 got ',j);
+            });
+        },
+        getFetchAsJson(url = 'getInfo', opts={}, callBack){
+
+            let fetch_getAll = async function( url='getInfo', opts = {}){
+                let resp = await fetch( '/apis/mapleaflet/gpxQ/'+url, opts );
+                if( !resp.ok ){
+                    //this.status = 'can\'t get list';
+                    return undefined;
+                }else{
+                    return await resp.json();
+                }            
+            }
+            let tcallBack = callBack;
+            fetch_getAll().then(data=>{ tcallBack( data ) } );
+        },
 
         getAllFromHost(){
-            console.log('gpx\'s ... getAllFromHost ');
-            if( 'gpxsManager' in window && window.gpxsManager.$data.gpxs.length != 0 ){
-                this.gpxs = window.gpxsManager.$data.gpxs;
-                console.log('window gpxsManager data -> gpxs\n',this.gpxs);
-                this.onNewData();
+            // wait it's fetching
+            if( window['gpxs']== -1 ){
+                console.log(`gpx\'s fetch in progress data - .... wait [${this.mapio.mapname}]`);
+                setTimeout(()=>{
+                    console.log(`      data - .. wait  [${this.mapio.mapname}]`);
+                    this.getAllFromHost();
+                },300);
+                return 1;
+            }
 
-            }else{            
+            
+            // is locally
+            if( window['gpxs'] != undefined  && window['gpxs'].length != 0 ){
+                this.gpxs = toRaw(JSON.parse(JSON.stringify( gpxs )));
+                this.gpxsEntryDate = window['gpxsEntryDate'];
+                console.log('gpx\'s ... getAllFromHost window gpxs data -> gpxs\n',this.gpxs,
+                    '\nentryDate:',this.gpxsEntryDate
+                );
+                this.onNewGpxs();
+                this.q2_register();
 
+            }else{       
+                
+                window['gpxs'] = -1;
                 let fetch_getAll = async function(){
                     let resp = await fetch('/apis/mapleaflet/gpxQ/getAll',{ });
                     if( !resp.ok ){
@@ -432,9 +749,15 @@ export default{
 
                 fetch_getAll().then(data=>{
                     if( data != 'error' ){
-                        this.gpxs = data;
-                        console.log('data -> gpxs\n',this.gpxs);
-                        this.onNewData();
+                        window['gpxs'] = toRaw( JSON.parse(JSON.stringify( data['gpxs'] )) );
+                        window['gpxsEntryDate'] = data['entryDate'];
+                        this.gpxs = JSON.parse(JSON.stringify( data['gpxs'] ));
+                        this.gpxsEntryDate = data['entryDate'];
+                        console.log('gpx\'s ... getAllFromHost host   data -> gpxs\n',this.gpxs,
+                            '\nentryDate:',this.gpxsEntryDate
+                        );
+                        this.onNewGpxs();
+                        this.q2_register();
                     }
                 });
 
