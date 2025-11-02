@@ -18,6 +18,8 @@ import { geoJtest1 } from './workGeojson/test1.js'
 import { geoJ1 } from "./geoJsonLibs/geoj1.js";
 import { geoJ2 } from "./geoJsonLibs/geoj2.js";
 import { wqh_mapleaflet } from "./wqh_mapleaflet.js";
+import { gpx_indexedDB } from "./workGpx/indexedDBTest1.js";
+
 
 
 
@@ -25,6 +27,7 @@ class s_vysmapleafletPage{
 
   constructor(){
 
+    this.gpxInDX = gpx_indexedDB;
     this.geoJ1 = geoJtest1;
     //this.lfmap = -1;
     this.lflayCon = -1;
@@ -69,6 +72,9 @@ class s_vysmapleafletPage{
     </style>
     <link rel="stylesheet" href="${this.homeUrl}node_modules/leaflet/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
     <link rel="stylesheet" href="${this.homeUrl}assets/leaflet_webpackFix.css">
+    <!--
+    <script src="${this.homeUrl}node_modules/leaflet/dist/leaflet-src.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+-->
     <script src="${this.homeUrl}node_modules/leaflet/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="${this.homeUrl}assets/togeojson.js"></script>
     <script src="${this.homeUrl}assets/leaflet.filelayer.js"></script>
@@ -88,6 +94,7 @@ class s_vysmapleafletPage{
     
     this.mioApp = createApp( MapioMapio,  
       {'mapname':"mio", 
+          'mapSize': 'width: 100vw; min-height: 75vh;',
           'mapOpts':{
             'abc':1,
             'zoomControl': false,
@@ -110,6 +117,7 @@ class s_vysmapleafletPage{
         } );
     this.mioApp1 = createApp( MapioMapio, 
       {'mapname':"mioMap2", 
+        'mapSize': 'width: 100vw; min-height: 25vh;',
         'mapioDirs': true,
         'addFullScreenBt': true,
         'addFallbackTiles': false,
@@ -118,7 +126,7 @@ class s_vysmapleafletPage{
         'homeUrl': this.homeUrl,  
         'addlfBaseMaps': false,
         //'depthSoundings': '../conturesTest/LogDepth.db',
-        'useGpxsManager': true
+        //'useGpxsManager': true
         
       } );
 
@@ -136,17 +144,15 @@ class s_vysmapleafletPage{
     More ditails in \`./site.json\`
     </pre>
     -->
-    <div id="lfmapio"></div>
-    <div id="lfmapio2"></div>
+    <div id="lfmapio"
+      ></div>
+    <div id="lfmapio2"
+      ></div>
     `;
 
   }
 
-  //lfAddMarker = ( ll )=>{
-  //  L.marker( ll ).addTo( this.lfmap );
-  //}
-
-
+  /*
   addMapOverlay=()=>{
     var crownHill = L.marker([39.75, -105.09]).bindPopup('This is Crown Hill Park.'),
     rubyHill = L.marker([39.68, -105.00]).bindPopup('This is Ruby Hill Park.');
@@ -154,6 +160,7 @@ class s_vysmapleafletPage{
     var parks = L.layerGroup();
     this.lflayCon.addOverlay( parks, 'Abc park');
   }
+  */
 
   getHtmlAfterLoad = () =>{
     cl(`${this.getName} - getHtmlAfterLoad()`);

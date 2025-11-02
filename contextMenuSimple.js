@@ -122,6 +122,8 @@ function showCoordinates (e) {
     });
 }
 
+
+
 function centerMap (e) {
     pager._page.mioApp.$data.map.panTo(e.latlng);
 }
@@ -232,6 +234,10 @@ class contextMenuSimple{
                 }
             },'-',
             {
+                text: '<i class="fa-solid fa-location-dot"></i>Add waypoint',
+                callback: this.add_waypoint
+            },
+            {
                 text: 'Show coordinates',
                 callback: showCoordinates
             }, {
@@ -260,6 +266,33 @@ class contextMenuSimple{
         };
 
     }
+
+    add_waypoint=( e )=>{
+        console.log(' add waypoint from context@['+this.map.mapname+'] menu :',e.latlng);
+        
+        //gpxsManager.add_waypoint(  e.latlng );
+        let tNow = gpxsCDB.getEntryDate();
+        gpxsCDB.onAction({ 
+                action: 'insert',
+                srcType: 'waypoint', 
+                data:{
+                    name: 'New poi',
+                    lat: e.latlng.lat,
+                    lon: e.latlng.lng,
+                    sym: '',
+                    ele: '',
+                    time: `${new Date()}`,
+                    desc: '',
+                    cmt: '',
+                    entryDate: tNow
+                },
+                src: gpxsCDB.getSrc(this.map.mapname+' / centextMenu'),
+                //data: toRaw( action == 'reset' ? this.orgData.data : this.data ),
+                entryDate: tNow
+                });
+
+    }
+
 
 }
 

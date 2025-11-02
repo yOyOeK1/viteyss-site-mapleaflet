@@ -277,6 +277,9 @@ export default{
         },
 
         setCurrentFoldersOverlays(){
+            if( this.control == undefined || this.mapFolders == undefined)
+                return 1;
+
             console.log('set current folders\ncontrol:\n'+this.control+' overlays done '+this.mapFoldersDone+'....',this.mlfmap,"\n\n",this.mapFolders);
             for( let mf of this.mapFolders){
                 //console.log('add current folder '+mf.name);

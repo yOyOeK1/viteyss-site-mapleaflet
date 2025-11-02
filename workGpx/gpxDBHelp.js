@@ -7,6 +7,9 @@ class gpxDBHelp{
         
         this.db = -1;
         
+        this.maxThreads = 1;
+        this.waitThrottle = 70;
+
         this.entryDate = Date.now();
 
         this.initDb();
@@ -167,7 +170,7 @@ class gpxDBHelp{
                 console.error("Error selecting resHendle ",err.message);
                 callBack( undefined );
             }else{
-                //console.log('waypoint ',rows);
+                //console.log('tracks ',rows);
                 callBack( rows );
             }
         });
@@ -196,6 +199,47 @@ class gpxDBHelp{
         }
     }
 
+    q_getAll2=( callBack, srcs, status = 0 )=>{
+        console.log('getAll2 status: '+status);
+
+        let tr = {
+            'gpxs':[],
+            'waypoints':[],
+            'routes':[],
+            'tracks':[]
+        };
+
+        callBack( tr );
+    }
+
+    lookAtPromiss = ( promiss, callBack ) => {
+        let loopAtPromiss = setInterval( ()=>{
+            let allDone = [];
+            let i = 0;
+            for( let pro of promiss ){
+                i++;
+                //console.log(i+' pro is ',pro);
+                if( pro.status == false){
+                    allDone.push(pro);
+                    if( this.maxThreads < allDone.length ){
+                        break;
+                    }
+                }
+            }
+            if( allDone == 0 ){  
+                console.log(' .... All DONE');
+                promiss = [];
+                clearInterval(loopAtPromiss);         
+                callBack();
+            }else{
+                //console.log('('+i+') wait ....('+i+' / '+promiss.length+')');
+                for( let pro of allDone){
+                    pro.runIt( (s) => { pro.status = s; }  );
+                }
+            }
+        },this.waitThrottle);
+    }
+
     q_getAll=( callBack, srcs, status = 0 )=>{
         console.log('getAll status: '+status);
         let tgetAll = this.q_getAll;
@@ -209,7 +253,7 @@ class gpxDBHelp{
             srcs = [];
             status++;
             this.db.all( 
-                `SELECT * FROM sources;`, [],function( err, rSources ){
+                `SELECT *, 'gpx' as 'type' FROM sources;`, [],function( err, rSources ){
                     if( err ){
                         console.error("Error selecting resHendle ",err.message);
                         callBack( undefined );
@@ -230,7 +274,7 @@ class gpxDBHelp{
                     s['id'], ( waypoints )=>{
                         s['waypoints']=waypoints;
                         wayDone++;
-                        if( wayDone == wayToDo ){
+                        if( wayDone == wayToDo || waypoints.length == 0 ){
                             tgetAll( callBack, srcs, status ); 
                         }                       
                     });
@@ -238,6 +282,8 @@ class gpxDBHelp{
         
         }else if( status == 2 ){ // tracks
              status++;
+             promiss = [];
+             
              for( let s of srcs ){
                 let traToDo = srcs.length;
                 let traDone = 0;
@@ -246,7 +292,7 @@ class gpxDBHelp{
                     s['id'], ( tracks )=>{
                         s['tracks'] = tracks ;
                         traDone++;
-                        if( traDone == traToDo ){
+                        if( traDone == traToDo || tracks.length == 0 ){
                             tgetAll( callBack, srcs, status ); 
                         }                       
                     });
@@ -261,27 +307,30 @@ class gpxDBHelp{
                    
              for( let s of srcs ){
                 //console.log('srcs: '+s.id);
-                for( let t of s['tracks'] ){
-                    //console.log('   track: '+t.id);
-                    let p = this.getSelect(`
-                        SELECT * FROM points WHERE track_id=${t['id']}
-                        `);
-                    p.then((d)=>{
-                       // console.log('   ... points ad '+t['id']);
-                        t['points'] = d;
-                    });    
-                    promiss.push( false );
-                    let pid = promiss.length-1;
-                    
-                    p.finally( ()=>{ 
-                        promiss[ pid ] = true; 
-                        //console.log('   point ... '+pid+' DONE');
-                    } );
-                    
-                    
+                if( 'tracks' in s ){
+
+                    let doIt=( t )=>{
+                        let runIt = ( callBack ) =>{
+                            let p = this.getSelect(`
+                                SELECT *, 'point' as 'type' FROM points WHERE track_id=${t['id']}
+                                `);
+                            p.then((d)=>{
+                            // console.log('   ... points ad '+t['id']);
+                                t['points'] = d;
+                                callBack(true);
+                            });
+                        };
+                        promiss.push( {status:false,runIt:runIt} );
+                   }
+
+                    for( let t of s['tracks'] ){
+                        //console.log('   track: '+t.id,'\n\tpromiss:'+promiss.length );
+                        doIt(  t );
+                    }
                 }
             }
 
+            
             this.lookAtPromiss( promiss, ()=>{
                 tgetAll( callBack, srcs, status ); 
             });
@@ -289,19 +338,24 @@ class gpxDBHelp{
         
         } else if( status == 4 ){ // get routes
             status++;
-            promiss = [];     
-                
-            for( let s of srcs ){                
-                let p = this.getSelect(`
-                    SELECT * FROM routes WHERE source_id=${s['id']}
-                    `);
-                promiss.push( false );
-                let pid = promiss.length -1;
-                p.then((d)=>{
-                    // console.log('   ... points ad '+t['id']);
-                    s['routes'] = d;
-                    promiss[ pid ] = true;
-                });    
+            promiss = [];   
+
+            let doIt=( s )=>{
+                let runIt = ( callBack ) => {
+                    let p = this.getSelect(`
+                        SELECT *,'route' as 'type' FROM routes WHERE source_id=${s['id']}
+                        `);
+                    p.then((d)=>{
+                        // console.log('   ... points ad '+t['id']);
+                        s['routes'] = d;
+                        callBack(true);
+                        });
+                };
+                promiss.push( {status:false,runIt:runIt} );
+            };
+
+            for( let s of srcs ){ 
+                doIt(  s );
             }
 
             this.lookAtPromiss( promiss, ()=>{
@@ -311,20 +365,28 @@ class gpxDBHelp{
         
         }  else if( status == 5 ){ // get routes points
             status++;
-            promiss = [];     
-                
-            for( let s of srcs ){ 
-                for( let r of s['routes'] ){                
+            promiss = [];  
+            
+            let isWaiting = false;
+
+            
+            let doIt =( r ) =>{
+                let runIt = ( callBack ) => {
                     let p = this.getSelect(`
                         SELECT * FROM points WHERE route_id=${r['id']}
                         `);
-                    promiss.push( false );
-                    let pid = promiss.length -1;
                     p.then((d)=>{
                         // console.log('   ... points ad '+t['id']);
                         r['points'] = d;
-                        promiss[ pid ] = true;
-                    });   
+                        callBack(true);
+                        });
+                };
+                promiss.push( {status:false,runIt:runIt} );
+            };
+                
+            for( let s of srcs ){ 
+                for( let r of s['routes'] ){                
+                   doIt(  r );
                 } 
             }
 
@@ -334,7 +396,11 @@ class gpxDBHelp{
                 
         
         }else {
-            console.log(" what now ? res ");
+            //console.log(" what now ? res ");
+            if( 'entryDate' in srcs ){
+                //console.log('       was send ?', ( Date.now() - srcs.entryDate ) );
+                return 1;
+            }
             this.entryDate = Date.now();
             srcs['entryDate'] = this.entryDate;
             callBack( srcs );
@@ -398,6 +464,12 @@ class gpxDBHelp{
         */
     }
 
+    getPromissinCountNDone=( promiss )=>{
+        let pNDone = 0;
+        for( let ps of promiss )
+            if( !ps ) pNDone++;
+        return pNDone;
+    }
 
     q_getInfo=( callBack, srcs, status = 0 )=>{
         console.log('getInfo status: '+status);
@@ -605,24 +677,7 @@ class gpxDBHelp{
         */
     }
 
-    lookAtPromiss = ( promiss, callBack ) => {
-        let loopAtPromiss = setInterval( ()=>{
-            let allDone = true;
-            for( let pro of promiss ){
-                if( pro == false){
-                    allDone = false;
-                    break;
-                }
-            }
-            if( allDone ){  
-                console.log(' .... All DONE');
-                promiss = [];
-                clearInterval(loopAtPromiss);         
-                callBack();
-            }else
-                console.log('wait ....');
-        },100);
-    }
+    
 
 
     dbAllAsync = (query, params = []) => {
@@ -642,6 +697,34 @@ class gpxDBHelp{
 
 
     insertNewGpx=( fPath, name, desc, srcType, gpx )=>{
+
+        console.log('insertNewGpx ... gpx info\n',
+            'tracks: ',gpx.tracks.length,
+            ', routes: ',gpx.routes.length,
+            ', waypoints: ',gpx.waypoints.length,
+        );
+
+        let mPOk = null;
+        let mPErr = null;
+        let mPromis = new Promise(( isOk, isEr )=>{
+            mPOk = isOk;
+            mPErr = isEr;
+        });
+
+        let iterRes = [];
+        let iterNo = 0;
+        let iterDone = 0;
+        let iterCurrentToDo = 4;
+        let iterItem = setInterval(()=>{
+
+            console.log(' .. chk status of insert of new gpx ....('+iterDone+' / '+iterCurrentToDo+')',iterNo++);
+            if( iterDone == iterCurrentToDo ){
+                mPOk( iterRes );
+                clearInterval( iterItem );
+            }
+        },1000);
+
+
         let tNow = parseInt(Date.now());
 
         let tinsertTracks = this.insertTracks;
@@ -656,16 +739,41 @@ class gpxDBHelp{
                 console.error("Error selecting resHendle ",err.message);
             }else{
                 let source_id = this.lastID;
+                iterDone++;
+                iterRes.push({source_id: source_id} );
                 console.log('gpx inserted with id .....',source_id);
-                tinsertTracks( source_id, tNow, gpx.tracks );
-                tinsertWaypoints( source_id, tNow, gpx.waypoints );
-                tinsertRoutes( source_id, tNow, gpx.routes );
+                tinsertTracks( source_id, tNow, gpx.tracks ).then((r)=>{
+                    console.log(' - track says:     ',r);
+                    iterRes.push({track: r} );
+                    iterDone++;
+                });
+                tinsertWaypoints( source_id, tNow, gpx.waypoints ).then((r)=>{
+                    console.log(' - waypoint says:  ',r);
+                    iterRes.push({waypoint: r} );
+                    iterDone++;
+                });
+                tinsertRoutes( source_id, tNow, gpx.routes ).then((r)=>{
+                    console.log(' - route says:     ',r);
+                    iterRes.push({route: r} );
+                    iterDone++;
+                });
+                return 11;
             }
         });
+        //console.log('gpxDBHelper insert res:\n',res );
+        return mPromis;
 
     }
 
     insertWaypoints=( source_id, tNow, waypoints )=>{
+
+        let mPOk = null;
+        let mPErr = null;
+        let mPromis = new Promise(( isOk, isEr )=>{
+            mPOk = isOk;
+            mPErr = isEr;
+        });
+
         let dParse = this.db.prepare( `
         INSERT INTO waypoints ( 
                             source_id,  name,   sym,    cmt,   lat,    lon,    ele,    time,   entryDate 
@@ -678,13 +786,19 @@ class gpxDBHelp{
                 ( err )=>{
                     if( err ){
                         console.error("Error selecting resHendle ",err.message);
+                        mPErr( err.message );
                     }else{
-                        
-
+                        mPOk({'waypoint_id':'ok'});
                     }
                 });
         }
         dParse.finalize();
+
+        if( waypoints.length == 0 ){
+            setTimeout(()=>{ mPOk({'waypoint_id':-1}); },10);
+        }
+
+        return mPromis;
 
     }
     //saveWaypoints
@@ -728,6 +842,13 @@ class gpxDBHelp{
     }
 
     insertRoutes=( source_id, tNow, routes )=>{
+        let mPOk = null;
+        let mPErr = null;
+        let mPromis = new Promise(( isOk, isEr )=>{
+            mPOk = isOk;
+            mPErr = isEr;
+        });
+
         let tinsertPoints = this.insertPoints;
         for( let r of routes ){
             //console.log('insert route',[                source_id,  r.name, r.cmt,  r.desc, r.src,  r.number,   r.link, r.distance.total, tNow ]);
@@ -735,7 +856,7 @@ class gpxDBHelp{
             INSERT INTO routes ( 
                                 source_id,  name,   cmt,    desc,   src,    number,         link,           type,   distance,           entryDate 
                 ) VALUES (      ?,          ?,      ?,      ?,      ?,      ?,              ?,              ?,      ?,                  ?);
-            `, [                source_id,  r.name, r.cmt,  r.desc, r.src,  `${r.number}`,  `${r.link}`,    r.type, r.distance.total,   tNow ],
+            `, [                source_id,  r.name, r.cmt,  r.desc, r.src,  `${r.number}`,  `${JSON.stringify(r.link)}`,    r.type, r.distance.total,   tNow ],
             function( err ){
                 if( err ){
                     console.error("Error selecting resHendle ",err.message);
@@ -743,22 +864,35 @@ class gpxDBHelp{
                     let route_id = this.lastID;
                     console.log('route inserted with id ...',route_id);
                     tinsertPoints( route_id, tNow, 'route', r.points );
-
+                    mPOk({'route_id':this.lastID});
                 }
             });
 
         }
+
+        if( routes.length == 0 ){
+            setTimeout(()=>{ mPOk({'route_id':-1}); },10);
+        }
+
+        return mPromis;
     }
 
     insertTracks=( source_id, tNow, tracks )=>{
+        let mPOk = null;
+        let mPErr = null;
+        let mPromis = new Promise(( isOk, isEr )=>{
+            mPOk = isOk;
+            mPErr = isEr;
+        });
         let tinsertPoints = this.insertPoints;
+
         for( let t of tracks ){
            //console.log('insert Track',[                source_id,  t.name, t.cmt,  t.desc, t.src,  t.number,   t.link, t.distance.total, tNow ]);
             let res = this.db.run( `
             INSERT INTO tracks ( 
                                 source_id,  name,   cmt,    desc,   src,    number,         link,   distance,   entryDate 
                 ) VALUES (      ?,          ?,      ?,      ?,      ?,      ?,              ?,      ?,          ?);
-            `, [                source_id,  t.name, t.cmt,  t.desc, t.src,  `${t.number}`,  `${t.link}`, t.distance.total, tNow ],
+            `, [                source_id,  t.name, t.cmt,  t.desc, t.src,  `${t.number}`,  `${JSON.stringify(t.link)}`, t.distance.total, tNow ],
             function( err ){
                 if( err ){
                     console.error("Error selecting resHendle ",err.message);
@@ -766,11 +900,18 @@ class gpxDBHelp{
                     let track_id = this.lastID;
                     console.log('track inserted with id ...',track_id);
                     tinsertPoints( track_id, tNow, 'track', t.points );
-
+                    mPOk({'track_id':track_id});
                 }
             });
 
         }
+
+
+        if( tracks.length == 0 ){
+            setTimeout(()=>{ mPOk({'track_id':-1}); },10);
+        }
+
+        return mPromis;
     }
     insertPoints=( source_id, tNow, pointsAs, points )=>{
         let t_id = 0;

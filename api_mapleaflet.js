@@ -23,6 +23,7 @@ import { kapLookInDir } from "./kapHelp.js";
 import { kmlLookInDir } from "./kmlHelp.js";
 import { dbSoundingsToData } from "./geoJsonLibs/fromdb.js";
 import { gpxHelp } from "./workGpx/gpxHelp.js";
+import { gpxParser } from "./workGpx/gpxParser.js";
 
 
 
@@ -58,6 +59,8 @@ class serverMapLeaflet{
             rejectUnauthorized: false
         }
         })
+
+        this.gpxQ_cashe = {};
 
 
         this.q2 = null;
@@ -195,19 +198,82 @@ class serverMapLeaflet{
     doGeT_gpxQ=( req, res, bUrl )=>{
         let tr = {};
 
-        if( bUrl.endsWith('/getAll') ){            
-            this.gpxH.dbh.q_getAll(
-                ( rows )=>{
-                    this.entryDate = parseInt( Date.now() );
-                    res.end(JSON.stringify({
-                        gpxs:rows,
-                        entryDate: this.entryDate
-                    },null,4));
-                    setTimeout(()=>{  this.q2_registerMe();  },7000);
+        if( bUrl.endsWith('/getAll') ){   
+            if( 'getAll' in this.gpxQ_cashe )  {
+                console.log('cashe ....');
+                res.end( this.gpxQ_cashe.getAll );
+
+            }else{
+                this.gpxQ_cashe['getAll'] = JSON.stringify(  this.gpxH.dbh.q_getAll() );
+                res.end( this.gpxQ_cashe['getAll'] );
+            }   
+            setTimeout(()=>{  this.q2_registerMe();  },7000);
+
+            
+            
+        
+        }else if(bUrl.endsWith('/importFromPost') ){
+            let chunks = [];
+            req.on('data', (chunk) => {
+                chunks.push(chunk);
+                console.log('data .....',chunks.length);
+            });
+            req.on('end', () => {
+                console.log('data end .....');
+                let body = Buffer.concat(chunks).toString();
+                console.log('Received POST body (size):', body.length);
+                let j = JSON.parse( body );
+                let gp = new gpxParser();        
+                gp.waypoints = j.waypoints;
+                gp.tracks = j.tracks;
+                gp.routes = j.routes;
+                //console.log('will import ....\n',gp);
+                let impRes = this.gpxH.importGpx(
+                    j.src.join(' / '),
+                    j.fileName,
+                    j.extraDesc,
+                    'file import',
+                    gp
+                );
+
+                //console.log('import result ------------------\n',impRes);
+                res.end(JSON.stringify({
+                    action: 'import',
+                    'status': 'ok',
+                    //'res': impRes
+                },null,4));
+                console.log('---- import DONE');
+                //this.doLazy5(res, 'ok');
+
+            });
+
+            console.log('import from post a gpx .....');
+
+        
+        }else if(bUrl.endsWith('/atom') ){
+            this.cl(' - atom action .....');
+            let tStart = Date.now();
+
+            let chunks = [];
+            req.on('data', (chunk) => {
+                chunks.push(chunk);
+                console.log('atom data .....',chunks.length);
+            });
+            req.on('end', () => {
+                console.log('atom data end .....');
+                let body = Buffer.concat(chunks).toString();
+                console.log('Received POST body (size):', body.length,'\n\n',body);
+                if( body.length == 0 ) {
+                    console.error('EE body is empty in atom action mapleaflet.js');
                 }
-            );
-            
-            
+                let j = JSON.parse( body );
+                
+                let resDB = this.gpxH.dbh.atom_action( j );
+                
+                resDB['workTime'] = parseInt(Date.now()-tStart);
+                res.end(JSON.stringify(resDB,null,4));
+            });
+
 
 
         }else if(bUrl.endsWith('/getInfo') ){
@@ -220,6 +286,30 @@ class serverMapLeaflet{
 
         return 1;
     }
+
+    doLazy5=( res, msg )=>{
+        this.lazyIs = 0;
+        this.lazyInter = setInterval(()=>{
+            if( this.lazyIs < 5 ){
+                this.doLazyResponseMiddle(res, `do lazy (${this.lazyIs++}): `+msg);
+
+            }else{
+                this.doLazyResponseEnd(res, `do lazy (${this.lazyIs++}): `+msg);
+                clearInterval( this.lazyInter );
+            }
+        },1000);
+    }
+
+    doLazyResponseMiddle=( res, msg )=>{
+
+        res.write( msg );
+        res.flush();
+    }
+    doLazyResponseEnd=( res, msg )=>{
+        res.end( msg );
+    }
+
+
 
 
     async doIt( req, res ){
@@ -356,7 +446,9 @@ class serverMapLeaflet{
     handleRequest( args ){
         let {req, res, server } = args;
 
-        if( req.method == this.method && String(req.url).startsWith(this.url) ){
+        if( 
+            //req.method == this.method && 
+            String(req.url).startsWith(this.url) ){
             //this.cl('in middle ....');
             this.server = server;
             return this.doIt( req,res );

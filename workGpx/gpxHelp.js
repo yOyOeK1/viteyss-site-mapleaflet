@@ -1,3 +1,4 @@
+import { gpxDBHelp2 } from "./gpxDBHelp2.js";
 import { gpxDBHelp } from "./gpxDBHelp.js";
 import fs from 'fs';
 import gpxParser from 'gpxparser'
@@ -11,7 +12,7 @@ class gpxHelp{
     constructor(opts){
         this.opts = opts;
         this.cl(' init .....');
-        this.dbh = new gpxDBHelp(  opts['dbPath'] );
+        this.dbh = new gpxDBHelp2(  opts['dbPath'] );
         this.q2 = -1;
 
     }
@@ -80,7 +81,7 @@ class gpxHelp{
     }
 
     importGpx=( xmlSource, name, desc, srcType, gpx ) =>{
-        this.dbh.insertNewGpx( xmlSource, name, desc, srcType, gpx );
+        return this.dbh.insert_NewGpx( xmlSource, name, desc, srcType, gpx );
     }  
    
 
@@ -95,6 +96,28 @@ if( 0 ){
 
     //gh.importFile( '/home/yoyo/Apps/viteyss-site-mapleaflet/workGpx/homePathTest/navobj.xml' );
     gh.importFile( '/home/yoyo/Apps/viteyss-site-mapleaflet/workGpx/homePathTest/layers/AnchorAuto.gpx');
+
+}
+
+if( 0 ){
+    let gh = new gpxHelp({
+        homePath: '/home/yoyo/Apps/viteyss-site-mapleaflet/workGpx/homePathTest',
+        dbPath: '/home/yoyo/Apps/viteyss-site-mapleaflet/workGpx/homePathTest/dbGpx.db'
+    });
+
+    //gh.importFile( '/home/yoyo/Apps/viteyss-site-mapleaflet/workGpx/homePathTest/navobj.xml' );
+    gh.importFile( '/home/yoyo/Apps/viteyss-site-mapleaflet/workTraks/navobj.gpx');
+
+}
+
+if( 0 ){
+    let gh = new gpxHelp({
+        homePath: '/home/yoyo/Apps/viteyss-site-mapleaflet/workGpx/homePathTest',
+        dbPath: '/home/yoyo/Apps/viteyss-site-mapleaflet/workGpx/homePathTest/dbGpx.db'
+    });
+
+    //gh.importFile( '/home/yoyo/Apps/viteyss-site-mapleaflet/workGpx/homePathTest/navobj.xml' );
+    gh.importFile( '/home/yoyo/Apps/viteyss-site-mapleaflet/workTraks/track3.gpx');
 
 }
 

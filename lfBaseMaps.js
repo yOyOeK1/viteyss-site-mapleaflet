@@ -25,7 +25,10 @@ let lfBaseMaps = function(map){
     });
     lfBaseBapsAttribution.push('© OpenStreetMap contributors, Tiles style by Humanitarian OpenStreetMap Team hosted by OpenStreetMap France');
     
-    var arcgis = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    var arcgis = L.tileLayer(   
+                                //'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', 
+                                onlineMaps['sateliteEsri']['proxy'],                               
+        {
         maxZoom: 18,
     });
     lfBaseBapsAttribution.push('© Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community');

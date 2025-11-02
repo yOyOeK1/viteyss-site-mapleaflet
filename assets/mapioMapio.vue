@@ -1,5 +1,6 @@
 <template>
-    <div class="mioMap" 
+    <div class="mioMap"
+        :style="mapSize"
         :id="mapname">mioMap {{ mapname }}</div>
 </template>
 <script>
@@ -25,6 +26,7 @@ var map = null;
 export default{
     props:{
         'mapname': { type: String, required: true },
+        'mapSize':{ default: 'width: 100vw; min-height: 100vh;' },
         'addlfBaseMaps': { type: Boolean, required: true },
         'homeUrl': { type: String, required: true },
         'fileLoad': { type: Boolean, default: false },
@@ -64,7 +66,8 @@ export default{
             settKey: `mapio/${this.mapname}/`,
             lfbm:ref(Object()),currBaseMapO: ref(Object()), lfbmKeySel: '', // for base map and settings
             mapioShareO: ref(Object()),
-            gpxsManager: ref(Object()), gpxsPanel: ref(Object())
+            gpxsManager: ref(Object()), gpxsPanel: ref(Object()),
+          
          };
     },
     methods:{
@@ -114,9 +117,7 @@ export default{
         console.log('mapio ['+this.mapname+'] opts: '+JSON.stringify(this.mapOpts,null,2));
 
         try{
-            this.map = toRaw( 
-                L.map( this.mapname, toRaw(this.mapOpts))
-            );
+            this.map = toRaw( L.map( this.mapname, toRaw(this.mapOpts) ));
 
         }catch(e){
             console.error('WTF --------------------ERROR\n',e,"\n----------------------- ERRORR");
@@ -150,6 +151,9 @@ export default{
             if( this.settingsOn && setOpts.isOpen == false ){
                 this.settingsOn = false;
             }
+
+            if( this.useGpxsManager )
+                this.gpxsManager._instance.ctx.onMoveEnd( e );
 
         });
         // for settings update ui if open settings END
@@ -263,6 +267,7 @@ export default{
             this.mPanel = createApp( MapioMapsPanel, { 'mapioMap': this } );
             this.mPanel.mount( `.${mPanelDivName}` );
             //window['mPanel'] = this.mPanel;
+
             this.map.on( 'moveend', (e='')=>{
                 console.log('moveend 7 ....');
                 this.mPanel._instance.ctx.onMoveDoneEvent( {'lfmap':this.map} );
@@ -563,8 +568,7 @@ export default{
 </script>
 <style>
 .mioMap{
-    width: 100vw; 
-    min-height: 50vh;
+   
 }
 
 .leaflet-bottom,.leaflet-top{

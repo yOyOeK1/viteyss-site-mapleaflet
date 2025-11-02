@@ -13,4 +13,8 @@ export default {
     'osmDarkAll':   {'org': 'https://4.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
                         'proxy': `${prefix}/osmDarkAll/{z}/{x}/{y}`
                     },
+    'sateliteEsri':
+                   {'org': 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                        'proxy': `${prefix}/sateliteEsri/{z}/{x}/{y}`
+                    },
 };

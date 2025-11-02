@@ -212,8 +212,8 @@ gpxParser.prototype.queryDirectSelector = function(parent, needle) {
     if(elements.length > 1) {
         let directChilds = parent.childNodes;
 
-        for(idx in directChilds) {
-            elem = directChilds[idx];
+        for(let idx in directChilds) {
+            let elem = directChilds[idx];
             if(elem.tagName === needle) {
                 finalElem = elem;
             }
@@ -371,6 +371,8 @@ gpxParser.prototype.toGeoJSON = function () {
             "type": "LineString",
             "coordinates": [],
             "properties": {
+                type: 'track',
+                pointsIds: []
             }
         };
 
@@ -382,11 +384,12 @@ gpxParser.prototype.toGeoJSON = function () {
         feature.properties.distance    = track.distance;
         feature.properties.number = track.number;
         feature.properties.link   = track.link;
-        feature.properties.type   = 'track';
-
+        
         for(idx in track.points) {
             let pt = track.points[idx];
         
+            feature.properties.pointsIds.push( pt.id );
+
             var geoPt = [];
             geoPt.push(pt.lon);
             geoPt.push(pt.lat);
@@ -408,6 +411,8 @@ gpxParser.prototype.toGeoJSON = function () {
                 "coordinates": []
             },
             "properties": {
+                type: "route",
+                pointsIds: []
             }
         };
 
@@ -419,12 +424,13 @@ gpxParser.prototype.toGeoJSON = function () {
         feature.properties.src    = track.src;
         feature.properties.number = track.number;
         feature.properties.link   = track.link;
-        feature.properties.type   = 'route';
-
+        
 
         for(idx in track.points) {
             let pt = track.points[idx];
         
+            feature.properties.pointsIds.push( pt.id );
+
             var geoPt = [];
             geoPt.push(pt.lon);
             geoPt.push(pt.lat);
@@ -446,7 +452,7 @@ gpxParser.prototype.toGeoJSON = function () {
                 "coordinates": []
             },
             "properties": {
-                "type": "waypoint"
+                type: 'waypoint'
             }
         };
 
@@ -455,7 +461,7 @@ gpxParser.prototype.toGeoJSON = function () {
         feature.properties.sym = pt.sym;
         feature.properties.cmt  = pt.cmt;
         feature.properties.desc = pt.desc;
-
+        
         feature.geometry.coordinates = [pt.lon, pt.lat, pt.ele];
 
         GeoJSON.features.push(feature);
