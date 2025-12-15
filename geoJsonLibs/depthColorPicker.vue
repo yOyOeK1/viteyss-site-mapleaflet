@@ -81,7 +81,7 @@ export default{
         onAddNew(){
             let cm = this.mapio.depthSouningO.geoH.colorM;
             this.mapio.depthSouningO.geoH.colorM.push(
-                JSON.parse( JSON.stringify(cm[ cm.length-1 ] ) )
+                JSON.clone( cm[ cm.length-1 ] )
             );
         },
         onRemove(){

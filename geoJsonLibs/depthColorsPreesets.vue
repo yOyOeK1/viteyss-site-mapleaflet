@@ -39,7 +39,7 @@ export default{
             return undefined;
         },
         onAddNew(){
-            let tr = JSON.parse( JSON.stringify( this.getPresetById( this.preselected_id ) ) );
+            let tr = JSON.clone( this.getPresetById( this.preselected_id ) );
             tr['id'] = Date.now();//this.presets.length;
             tr['name']+='_'+(Date.now()%1000);
             this.presets.push( tr );

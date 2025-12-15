@@ -11,6 +11,7 @@
   "license": "MIT",
   "description": "Map on leafletjs",
   "dependencies": {
+    "better-sqlite3": "^12.4.1",
     "gpxparser": "^3.0.8",
     "leaflet": "^1.9.4",
     "leaflet-auto-graticule": "^2.0.0",
