@@ -37,9 +37,13 @@ class serverMapLeaflet{
         this.ottO = undefined;
         this.server = undefined;
         this.casheFolder = '/home/yoyo/tmp/charts';
+        
+        //this.mapleafletPath = '/home/iloo/Projects/ilooViteYss/sharelibs/viteyss-site-mapleaflet';
+        this.mapleafletPath = '/home/yoyo/Apps/viteyss-site-mapleaflet';
+        
         this.mapioFolders = [
-           { 'name': 'kaps1 test', 'dir': '/home/yoyo/Apps/viteyss-site-mapleaflet/tests' },
-           { 'name': 'kmls1 test', 'dir': '/home/yoyo/Apps/viteyss-site-mapleaflet/workKmls' }
+           { 'name': 'kaps1 test', 'dir': this.mapleafletPath+'/tests' },
+           { 'name': 'kmls1 test', 'dir': this.mapleafletPath+'/workKmls' }
         ];
         this.kapsResults = -1;
         this.onlineMaps = onlineMaps;
@@ -49,8 +53,8 @@ class serverMapLeaflet{
 
 
         this.gpxH = new gpxHelp({
-            homePath: '/home/yoyo/Apps/viteyss-site-mapleaflet/workGpx/homePathTest',
-            dbPath: '/home/yoyo/Apps/viteyss-site-mapleaflet/workGpx/homePathTest/dbGpx.db'
+            homePath: this.mapleafletPath+'/workGpx/homePathTest',
+            dbPath: this.mapleafletPath+'/workGpx/homePathTest/dbGpx.db'
         });
 
 
