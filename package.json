@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "kapTest": "node ./kapHelp.js",
 
-    "mkBackup": "fn=$npm_package_name\"_v\"$npm_package_version\"_tt\"`date +%y%m%d%H%M%S`\".tar.bz2\"; echo \"name will be [$fn]\";  tar --exclude=\".git\" --exclude=\"node_modules\" -cvf \"../\"$fn ./; echo \"Backup done: [$fn]\"; ls -alh ../$fn"
+    "mkBackup": "fn=$npm_package_name\"_v\"$npm_package_version\"_tt\"`date +%y%m%d%H%M%S`\".tar.bz2\"; echo \"name will be [$fn]\";  tar --exclude=\".git\"   --exclude=\"tests/.split/*\"  --exclude=\"node_modules\" -cvf \"../\"$fn ./; echo \"Backup done: [$fn]\"; ls -alh ../$fn"
   },
   "author": "Bartłomiej Ceglik <yoyoek@wp.pl>",
   "license": "MIT",
